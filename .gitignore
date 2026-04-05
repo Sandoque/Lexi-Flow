@@ -25,3 +25,6 @@ htmlcov/
 Thumbs.db
 .vscode/
 .idea/
+
+# Arquivos locais de segredo
+secret.env

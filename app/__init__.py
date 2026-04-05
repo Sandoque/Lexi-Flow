@@ -1,12 +1,15 @@
 """Fabrica de aplicacao Flask do projeto LexiFlow."""
 
+from pathlib import Path
+
 from dotenv import load_dotenv
 from flask import Flask
 
-from config import config_by_name
 from app.utils.file_handlers import ensure_directory
+SECRET_ENV_PATH = Path(__file__).resolve().parent.parent / "secret.env"
+load_dotenv(dotenv_path=SECRET_ENV_PATH, override=False)
 
-load_dotenv()
+from config import config_by_name
 
 
 def create_app(config_name: str = "default") -> Flask:

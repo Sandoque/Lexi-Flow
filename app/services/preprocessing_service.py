@@ -7,7 +7,7 @@ import re
 import string
 import unicodedata
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, cast
 
 import pandas as pd
 
@@ -175,7 +175,8 @@ def carregar_recursos_nlp(config: NLPConfig) -> NLPResources:
 
 def tokenize_with_spacy(text: str, config: NLPConfig, resources: NLPResources) -> list[str]:
     """Tokeniza com spaCy e aplica filtros opcionais de NLP."""
-    doc = resources.nlp(text)
+    nlp = cast(Any, resources.nlp)
+    doc = nlp(text)
     tokens: list[str] = []
 
     for token in doc:

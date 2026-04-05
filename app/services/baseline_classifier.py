@@ -7,7 +7,7 @@ import math
 from dataclasses import asdict
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import joblib
 import pandas as pd
@@ -84,11 +84,11 @@ def executar_treinamento_baseline(
 
     macro_predictions = predict_macro(
         macro_pipeline=macro_artifact["pipeline"],
-        texts=split_data["test_df"]["texto_processado"].tolist(),
+        texts=list(split_data["test_df"]["texto_processado"].astype(str)),
     )
     detailed_predictions = predict_detailed(
         detailed_models=detailed_artifact["models"],
-        texts=split_data["test_df"]["texto_processado"].tolist(),
+        texts=list(split_data["test_df"]["texto_processado"].astype(str)),
         macro_predictions=macro_predictions,
         global_model=detailed_artifact["global_model"],
         fallback_label=detailed_artifact["global_fallback_label"],
@@ -96,8 +96,8 @@ def executar_treinamento_baseline(
     )
     oracle_detailed_predictions = predict_detailed(
         detailed_models=detailed_artifact["models"],
-        texts=split_data["test_df"]["texto_processado"].tolist(),
-        macro_predictions=split_data["test_df"][MACRO_TARGET].astype(str).tolist(),
+        texts=list(split_data["test_df"]["texto_processado"].astype(str)),
+        macro_predictions=list(split_data["test_df"][MACRO_TARGET].astype(str)),
         global_model=detailed_artifact["global_model"],
         fallback_label=detailed_artifact["global_fallback_label"],
         use_macro_filter=True,
@@ -230,14 +230,15 @@ def train_detailed_classifier(
     models: dict[str, dict[str, Any]] = {}
     metadata: list[dict] = []
 
-    for macro_class, group in train_df.groupby(MACRO_TARGET, sort=True):
+    for macro_key, group in train_df.groupby(MACRO_TARGET, sort=True):
+        macro_class = str(macro_key)
         subset = group[group[DETAILED_TARGET].astype(str).str.strip() != ""].copy()
         detail_labels = subset[DETAILED_TARGET].astype(str)
 
         if subset.empty:
             continue
 
-        detail_options = sorted(detail_labels.unique().tolist())
+        detail_options = [str(option) for option in sorted(list(detail_labels.unique()))]
         if len(detail_options) == 1:
             models[macro_class] = {
                 "type": "constant",
@@ -264,7 +265,7 @@ def train_detailed_classifier(
         raise BaselineError("Nao foi possivel treinar a camada detalhada com o dataset atual.")
 
     global_model = treinar_modelo_global_detalhado(train_df, random_state=random_state)
-    global_fallback_label = (
+    global_fallback_label = str(
         train_df[DETAILED_TARGET].fillna("").astype(str).str.strip().value_counts().index[0]
     )
 
@@ -278,7 +279,7 @@ def train_detailed_classifier(
 
 def predict_macro(macro_pipeline: Pipeline, texts: list[str]) -> list[str]:
     """Gera previsoes de macroclasse para o nivel 1."""
-    return macro_pipeline.predict(texts).tolist()
+    return [str(prediction) for prediction in macro_pipeline.predict(texts)]
 
 
 def predict_detailed(
@@ -442,7 +443,7 @@ def treinar_modelo_global_detalhado(
 ) -> dict[str, Any]:
     """Treina um modelo global de classe detalhada para fallback e comparacoes futuras."""
     labels = train_df[DETAILED_TARGET].astype(str)
-    unique_labels = sorted(labels.unique().tolist())
+    unique_labels = sorted(list(labels.unique()))
 
     if len(unique_labels) == 1:
         return {
@@ -478,7 +479,7 @@ def avaliar_predicoes(
     chart_title: str,
 ) -> dict:
     """Calcula metricas, exemplos e matriz de confusao para um conjunto de predicoes."""
-    labels = sorted(set(test_df[true_column].astype(str).tolist()) | set(predictions))
+    labels = sorted(set(list(test_df[true_column].astype(str))) | set(predictions))
     matrix = confusion_matrix(test_df[true_column], predictions, labels=labels)
 
     metrics = {
@@ -497,12 +498,15 @@ def avaliar_predicoes(
         ),
     }
 
-    report_dict = classification_report(
-        test_df[true_column],
-        predictions,
-        labels=labels,
-        output_dict=True,
-        zero_division=0,
+    report_dict = cast(
+        dict[str, Any],
+        classification_report(
+            test_df[true_column],
+            predictions,
+            labels=labels,
+            output_dict=True,
+            zero_division=0,
+        ),
     )
     report_text = classification_report(
         test_df[true_column],

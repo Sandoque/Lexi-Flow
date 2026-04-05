@@ -1,5 +1,7 @@
 """Testes unitarios da camada de pre-processamento textual."""
 
+from typing import cast
+
 import pandas as pd
 
 from app.services.nlp_config import NLPConfig
@@ -19,13 +21,16 @@ def test_prepare_texts_preserva_texto_original_e_gera_colunas_processadas():
     config = NLPConfig(use_spacy=False, remove_stopwords=False, lemmatize=False)
 
     result = prepare_texts(df, config)
+    texto_original = cast(str, result.loc[0, "texto_original"])
+    texto_processado = cast(str, result.loc[0, "texto_processado"])
+    texto_tokens = cast(list[str], result.loc[1, "texto_tokens"])
 
     assert "texto_original" in result.columns
     assert "texto_processado" in result.columns
     assert "texto_tokens" in result.columns
-    assert result.loc[0, "texto_original"].startswith("  Olá")
-    assert result.loc[0, "texto_processado"] == "olá mundo este é um teste"
-    assert result.loc[1, "texto_tokens"] == ["canal", "e", "mail", "assunto", "cobrança"]
+    assert texto_original.startswith("  Olá")
+    assert texto_processado == "olá mundo este é um teste"
+    assert texto_tokens == ["canal", "e", "mail", "assunto", "cobrança"]
 
 
 def test_prepare_texts_remove_stopwords_quando_habilitado():
@@ -34,8 +39,9 @@ def test_prepare_texts_remove_stopwords_quando_habilitado():
     config = NLPConfig(use_spacy=False, remove_stopwords=True, lemmatize=False)
 
     result = prepare_texts(df, config)
+    texto_processado = cast(str, result.loc[0, "texto_processado"])
 
-    assert result.loc[0, "texto_processado"] == "esse é texto teste base"
+    assert texto_processado == "esse é texto teste base"
 
 
 def test_prepare_texts_pode_manter_pontuacao_quando_configurado():
@@ -44,9 +50,11 @@ def test_prepare_texts_pode_manter_pontuacao_quando_configurado():
     config = NLPConfig(use_spacy=False, remove_punctuation=False, remove_stopwords=False)
 
     result = prepare_texts(df, config)
+    texto_tokens = cast(list[str], result.loc[0, "texto_tokens"])
+    texto_processado = cast(str, result.loc[0, "texto_processado"])
 
-    assert result.loc[0, "texto_tokens"] == ["teste", ",", "com", "pontuação", "!"]
-    assert result.loc[0, "texto_processado"] == "teste , com pontuação !"
+    assert texto_tokens == ["teste", ",", "com", "pontuação", "!"]
+    assert texto_processado == "teste , com pontuação !"
 
 
 def test_funcoes_basicas_de_limpeza_textual():
