@@ -240,3 +240,58 @@ def test_genai_demo_route_falls_back_to_mock_when_remote_provider_fails(
     assert b"Fallback aplicado" in response.data
     assert b"Provider efetivo" in response.data
     assert b"mock" in response.data
+
+
+def test_predict_route_guides_user_when_artifacts_are_missing(tmp_path: Path):
+    """Garante orientacao amigavel quando os artefatos ainda nao foram gerados."""
+    app = create_app("testing")
+    app.config["ARTIFACTS_FOLDER"] = tmp_path / "artifacts"
+    client = app.test_client()
+
+    response = client.get("/predict")
+
+    assert response.status_code == 200
+    assert b"Artefatos ainda nao disponiveis" in response.data
+    assert b"Ir para /baseline" in response.data
+
+
+def test_predict_route_runs_end_to_end_in_mock_mode(tmp_path: Path):
+    """Garante a inferencia ponta a ponta com baseline treinado e mock ativo."""
+    app = create_app("testing")
+    app.config["UPLOAD_FOLDER"] = tmp_path
+    app.config["ARTIFACTS_FOLDER"] = tmp_path / "artifacts"
+    app.config["GENAI_PROVIDER"] = "mock"
+    app.config["GENAI_MOCK_MODE"] = True
+    client = app.test_client()
+
+    csv_content = (
+        "id_registro,texto,canal_origem,data,classe_macro,classe_detalhada\n"
+        "1,Erro no login do sistema,email,2026-04-04,Suporte,Login\n"
+        "2,Problema com senha esquecida,chat,2026-04-05,Suporte,Senha\n"
+        "3,Duvida sobre segunda via de boleto,email,2026-04-06,Financeiro,Boleto\n"
+        "4,Quero atualizar dados cadastrais,portal,2026-04-07,Cadastro,Atualizacao\n"
+        "5,Erro ao anexar documento,chat,2026-04-08,Suporte,Anexo\n"
+        "6,Consulta sobre cobranca em aberto,email,2026-04-09,Financeiro,Cobranca\n"
+        "7,Pedido de alteracao de endereco,portal,2026-04-10,Cadastro,Endereco\n"
+        "8,Problema no acesso a conta,chat,2026-04-11,Suporte,Login\n"
+    )
+    (tmp_path / "baseline.csv").write_text(csv_content, encoding="utf-8")
+
+    baseline_response = client.get("/baseline")
+
+    assert baseline_response.status_code == 200
+
+    response = client.post(
+        "/predict",
+        data={
+            "channel_origin": "Email",
+            "text_input": "Preciso da segunda via do boleto com urgencia hoje.",
+        },
+    )
+
+    assert response.status_code == 200
+    assert b"Predicao estatistica" in response.data
+    assert b"Classe detalhada sugerida" in response.data
+    assert b"Financeiro" in response.data
+    assert b"Boleto" in response.data
+    assert b"Provider usado" in response.data

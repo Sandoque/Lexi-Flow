@@ -1,0 +1,204 @@
+{% extends "base.html" %}
+
+{% block title %}{{ app_name }} | Predicao{% endblock %}
+
+{% block content %}
+<section class="hero-panel hero-panel--compact">
+    <article class="hero-panel__content">
+        <p class="eyebrow">Inferencia ponta a ponta</p>
+        <h1>Predicao assistida em fluxo real</h1>
+        <p class="hero-panel__description">
+            Cole um novo texto e deixe o LexiFlow executar o pipeline completo: NLP, classificacao macro,
+            sugestao detalhada baseline e refinamento complementar com GenAI.
+        </p>
+        <div class="hero-panel__actions">
+            <a class="button button-secondary" href="{{ url_for('pipeline.baseline') }}">Treinar baseline</a>
+            <a class="button button-secondary" href="{{ url_for('pipeline.genai_demo') }}">Abrir GenAI Demo</a>
+        </div>
+    </article>
+
+    <aside class="hero-panel__highlight">
+        <p class="highlight-label">Papel da GenAI</p>
+        <strong>Complementar, nao substitutiva</strong>
+        <span>
+            O baseline hierarquico define a macroclasse e restringe o espaco de busca. A GenAI entra depois,
+            explicando e refinando a classe detalhada com contexto operacional.
+        </span>
+    </aside>
+</section>
+
+{% if not artifacts_ready %}
+    <section class="panel">
+        <p class="eyebrow">Dependencia de modelo</p>
+        <h2>Artefatos ainda nao disponiveis</h2>
+        <p>
+            Para usar a inferencia real, treine primeiro o baseline hierarquico. A rota <code>/predict</code>
+            reaproveita os artefatos salvos em <code>data/artifacts</code>.
+        </p>
+        <div class="action-row">
+            <a class="button button-primary" href="{{ url_for('pipeline.baseline') }}">Ir para /baseline</a>
+        </div>
+    </section>
+{% endif %}
+
+<section class="panel prediction-layout">
+    <div>
+        <p class="eyebrow">Entrada</p>
+        <h2>Novo caso para classificacao</h2>
+        <p>O texto original e preservado. O pre-processamento e aplicado antes da previsao macro.</p>
+
+        <form method="post" class="upload-form">
+            <label for="channel_origin">Canal de origem</label>
+            <select id="channel_origin" name="channel_origin">
+                {% for option in channel_options %}
+                    <option value="{{ option }}" {% if option == selected_channel %}selected{% endif %}>
+                        {{ option if option else "Nao informado" }}
+                    </option>
+                {% endfor %}
+            </select>
+
+            <label for="text_input">Texto do caso</label>
+            <textarea
+                id="text_input"
+                name="text_input"
+                rows="10"
+                class="textarea-input"
+                placeholder="Cole aqui um novo texto para classificacao assistida."
+            >{{ text_input }}</textarea>
+
+            <button type="submit" class="button button-primary">Executar inferencia</button>
+        </form>
+    </div>
+
+    <aside class="panel panel-inner">
+        <p class="eyebrow">Fluxo aplicado</p>
+        <h2>Pipeline em producao assistida</h2>
+        <ul class="distribution-list">
+            <li><span>1. NLP</span><strong>normalizacao e tokenizacao</strong></li>
+            <li><span>2. Baseline macro</span><strong>TF-IDF + Logistic Regression</strong></li>
+            <li><span>3. Filtro detalhado</span><strong>somente classes da macro prevista</strong></li>
+            <li><span>4. GenAI</span><strong>refinamento explicavel</strong></li>
+        </ul>
+    </aside>
+</section>
+
+{% if prediction_result %}
+    <section class="metrics-grid">
+        <article class="metric-card">
+            <span>Macro prevista</span>
+            <strong>{{ prediction_result.baseline.macro_class }}</strong>
+        </article>
+        <article class="metric-card">
+            <span>Confianca macro</span>
+            <strong>{{ prediction_result.baseline.macro_confidence_percent }}</strong>
+        </article>
+        <article class="metric-card">
+            <span>Faixa de confianca</span>
+            <strong>{{ prediction_result.baseline.confidence_band }}</strong>
+        </article>
+        <article class="metric-card">
+            <span>Classe detalhada final</span>
+            <strong>{{ prediction_result.genai.detailed_class }}</strong>
+        </article>
+        <article class="metric-card">
+            <span>Provider usado</span>
+            <strong>{{ prediction_result.genai.provider }}</strong>
+        </article>
+    </section>
+
+    <section class="predict-summary-grid">
+        <article class="panel">
+            <div class="table-header">
+                <div>
+                    <p class="eyebrow">Entrada e NLP</p>
+                    <h2>Texto processado</h2>
+                </div>
+                <p>Etapas aplicadas: {{ prediction_result.baseline.preprocessing_steps|join(", ") }}</p>
+            </div>
+            <ul class="distribution-list">
+                <li><span>Canal de origem</span><strong>{{ prediction_result.input.channel_origin or "Nao informado" }}</strong></li>
+                <li><span>Texto original</span><strong>{{ prediction_result.input.original_text }}</strong></li>
+                <li><span>Texto processado</span><strong>{{ prediction_result.input.processed_text }}</strong></li>
+            </ul>
+        </article>
+
+        <article class="panel">
+            <div class="table-header">
+                <div>
+                    <p class="eyebrow">Baseline hierarquico</p>
+                    <h2>Predicao estatistica</h2>
+                </div>
+                <p>O filtro detalhado segue apenas as opcoes coerentes com a macro prevista.</p>
+            </div>
+            <ul class="distribution-list">
+                <li><span>Macro prevista</span><strong>{{ prediction_result.baseline.macro_class }}</strong></li>
+                <li><span>Score da macro</span><strong>{{ prediction_result.baseline.macro_confidence_percent }}</strong></li>
+                <li><span>Sugestao inicial detalhada</span><strong>{{ prediction_result.genai.baseline_detail }}</strong></li>
+            </ul>
+            <div class="expected-columns">
+                <h3>Classes detalhadas validas da macro</h3>
+                <ul class="tag-list">
+                    {% for detail in prediction_result.baseline.valid_detailed_classes %}
+                        <li>{{ detail }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </article>
+    </section>
+
+    <section class="predict-summary-grid">
+        <article class="panel">
+            <div class="table-header">
+                <div>
+                    <p class="eyebrow">Refinamento GenAI</p>
+                    <h2>Saida complementar</h2>
+                </div>
+                <p>A camada generativa explica e prioriza, sem substituir o baseline.</p>
+            </div>
+            <ul class="distribution-list">
+                <li><span>Classe detalhada sugerida</span><strong>{{ prediction_result.genai.detailed_class }}</strong></li>
+                <li><span>Justificativa</span><strong>{{ prediction_result.genai.justification }}</strong></li>
+                <li><span>Prioridade sugerida</span><strong>{{ prediction_result.genai.priority }}</strong></li>
+                <li><span>Caso ambiguo</span><strong>{% if prediction_result.genai.ambiguous_case %}Sim{% else %}Nao{% endif %}</strong></li>
+                <li><span>Provider usado</span><strong>{{ prediction_result.genai.provider }}</strong></li>
+            </ul>
+
+            {% if prediction_result.genai.fallback_reason %}
+                <div class="predict-alert">
+                    <strong>Observacao operacional</strong>
+                    <p>{{ prediction_result.genai.fallback_reason }}</p>
+                </div>
+            {% endif %}
+        </article>
+
+        <article class="panel">
+            <div class="table-header">
+                <div>
+                    <p class="eyebrow">Acao recomendada</p>
+                    <h2>Leitura operacional</h2>
+                </div>
+                <p>A recomendacao considera confianca macro, ambiguidade e prioridade.</p>
+            </div>
+            <ul class="distribution-list">
+                <li><span>Acao</span><strong>{{ prediction_result.recommendation.action }}</strong></li>
+                <li><span>Racional</span><strong>{{ prediction_result.recommendation.rationale }}</strong></li>
+                <li><span>Requer revisao humana</span><strong>{% if prediction_result.recommendation.requires_review %}Sim{% else %}Nao{% endif %}</strong></li>
+                <li><span>Faixa de confianca</span><strong>{{ prediction_result.recommendation.confidence_band }}</strong></li>
+            </ul>
+        </article>
+    </section>
+
+    {% if prediction_result.genai.prompt %}
+        <section class="panel">
+            <div class="table-header">
+                <div>
+                    <p class="eyebrow">Auditoria leve</p>
+                    <h2>Prompt estruturado enviado para a GenAI</h2>
+                </div>
+                <p>Base pronta para evolucao com few-shot contextual e recuperacao de exemplos similares.</p>
+            </div>
+            <pre class="report-block">{{ prediction_result.genai.prompt }}</pre>
+        </section>
+    {% endif %}
+{% endif %}
+{% endblock %}

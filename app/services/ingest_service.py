@@ -27,13 +27,15 @@ class IngestaoError(Exception):
 
 
 def processar_upload_csv(
-    uploaded_file: FileStorage,
+    uploaded_file: FileStorage | None,
     upload_folder: str | Path,
     allowed_extensions: set[str] | None = None,
 ) -> dict:
     """Executa o fluxo completo de ingestao de um arquivo CSV."""
     allowed_extensions = allowed_extensions or {"csv"}
     filename = validar_arquivo_enviado(uploaded_file, allowed_extensions)
+    if uploaded_file is None:
+        raise IngestaoError("Selecione um arquivo CSV para continuar.")
     file_bytes = obter_conteudo_arquivo(uploaded_file)
     dataframe = carregar_dataframe(file_bytes)
     validar_colunas_obrigatorias(dataframe)
@@ -46,7 +48,7 @@ def processar_upload_csv(
 
 
 def validar_arquivo_enviado(
-    uploaded_file: FileStorage,
+    uploaded_file: FileStorage | None,
     allowed_extensions: set[str],
 ) -> str:
     """Valida a presenca do arquivo e sua extensao."""

@@ -19,6 +19,12 @@ from app.services.genai_refiner import (
 )
 from app.services.generative_refinement import get_generative_placeholder
 from app.services.ingest_service import IngestaoError, REQUIRED_COLUMNS, processar_upload_csv
+from app.services.prediction_service import (
+    PredictionError,
+    artefatos_predicao_disponiveis,
+    executar_fluxo_predicao,
+    obter_canais_origem_padrao,
+)
 
 pipeline_bp = Blueprint("pipeline", __name__)
 
@@ -141,6 +147,46 @@ def genai_demo():
         selected_entry=selected_entry,
         text_input=text_input,
         genai_result=genai_result,
+    )
+
+
+@pipeline_bp.route("/predict", methods=["GET", "POST"])
+def predict():
+    """Executa a inferencia ponta a ponta com baseline e camada GenAI complementar."""
+    channel_options = obter_canais_origem_padrao()
+    text_input = request.form.get("text_input", "")
+    selected_channel = request.form.get("channel_origin", "")
+    prediction_result = None
+    artifacts_ready = artefatos_predicao_disponiveis(current_app.config["ARTIFACTS_FOLDER"])
+
+    if request.method == "POST":
+        try:
+            prediction_result = executar_fluxo_predicao(
+                text=text_input,
+                channel_origin=selected_channel,
+                artifacts_folder=current_app.config["ARTIFACTS_FOLDER"],
+                genai_settings=get_genai_settings_from_config(current_app.config),
+            )
+            if prediction_result["genai"]["status"] == "ok":
+                flash("Inferencia concluida com baseline e camada GenAI complementar.", "success")
+            else:
+                flash(
+                    "Inferencia concluida com baseline. A camada GenAI ficou indisponivel nesta execucao.",
+                    "warning",
+                )
+        except PredictionError as exc:
+            flash(str(exc), "warning")
+        except Exception:
+            current_app.logger.exception("Erro inesperado durante a inferencia ponta a ponta.")
+            flash("Nao foi possivel concluir a inferencia com o texto informado.", "danger")
+
+    return render_template(
+        "predict.html",
+        channel_options=channel_options,
+        text_input=text_input,
+        selected_channel=selected_channel,
+        prediction_result=prediction_result,
+        artifacts_ready=artifacts_ready,
     )
 
 
