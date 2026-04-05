@@ -1,0 +1,156 @@
+"""Rotas relacionadas ao fluxo de classificacao textual."""
+
+from flask import Blueprint, current_app, flash, redirect, render_template, request, session, url_for
+
+from app.services.baseline_classifier import (
+    BaselineError,
+    executar_treinamento_baseline,
+    get_baseline_placeholder,
+)
+from app.services.data_validation import get_validation_placeholder
+from app.services.eda_service import EDAError, carregar_eda_do_ultimo_dataset
+from app.services.exploratory_analysis import get_eda_placeholder
+from app.services.genai_refiner import (
+    GenAIRefiner,
+    GenAIRefinerError,
+    get_demo_few_shot_examples,
+    get_demo_macro_options,
+    get_genai_settings_from_config,
+)
+from app.services.generative_refinement import get_generative_placeholder
+from app.services.ingest_service import IngestaoError, REQUIRED_COLUMNS, processar_upload_csv
+
+pipeline_bp = Blueprint("pipeline", __name__)
+
+
+@pipeline_bp.route("/upload", methods=["GET", "POST"])
+def upload():
+    """Exibe a tela de upload e processa a ingestao do CSV."""
+    ingest_result = None
+
+    if request.method == "POST":
+        uploaded_file = request.files.get("dataset")
+
+        try:
+            ingest_result = processar_upload_csv(
+                uploaded_file=uploaded_file,
+                upload_folder=current_app.config["UPLOAD_FOLDER"],
+                allowed_extensions=current_app.config["ALLOWED_EXTENSIONS"],
+            )
+            session["last_uploaded_file"] = ingest_result["saved_path"]
+            flash(
+                "Arquivo validado e salvo com sucesso em data/raw.",
+                "success",
+            )
+        except IngestaoError as exc:
+            flash(str(exc), "danger")
+        except Exception:
+            current_app.logger.exception("Erro inesperado durante a ingestao do dataset.")
+            flash(
+                "Ocorreu um erro inesperado durante a ingestao. Tente novamente com outro arquivo.",
+                "danger",
+            )
+
+    return render_template(
+        "upload.html",
+        ingest_result=ingest_result,
+        expected_columns=REQUIRED_COLUMNS,
+    )
+
+
+@pipeline_bp.get("/eda")
+def eda():
+    """Exibe a analise exploratoria do ultimo dataset disponivel."""
+    try:
+        eda_result = carregar_eda_do_ultimo_dataset(
+            upload_folder=current_app.config["UPLOAD_FOLDER"],
+            preferred_path=session.get("last_uploaded_file"),
+            example_limit=2,
+            top_detailed_limit=8,
+        )
+    except EDAError as exc:
+        flash(str(exc), "warning")
+        return redirect(url_for("pipeline.upload"))
+    except Exception:
+        current_app.logger.exception("Erro inesperado ao gerar a analise exploratoria.")
+        flash(
+            "Nao foi possivel montar a analise exploratoria do dataset.",
+            "danger",
+        )
+        return redirect(url_for("pipeline.upload"))
+
+    return render_template("eda.html", eda_result=eda_result)
+
+
+@pipeline_bp.route("/baseline", methods=["GET"])
+def baseline():
+    """Treina e exibe o baseline hierarquico para o dataset ativo."""
+
+    try:
+        baseline_result = executar_treinamento_baseline(
+            upload_folder=current_app.config["UPLOAD_FOLDER"],
+            artifacts_folder=current_app.config["ARTIFACTS_FOLDER"],
+            preferred_path=session.get("last_uploaded_file"),
+        )
+    except BaselineError as exc:
+        flash(str(exc), "warning")
+        return redirect(url_for("pipeline.upload"))
+    except Exception:
+        current_app.logger.exception("Erro inesperado durante o treinamento baseline.")
+        flash("Nao foi possivel treinar o baseline com o dataset atual.", "danger")
+        return redirect(url_for("pipeline.upload"))
+
+    return render_template("baseline.html", baseline_result=baseline_result)
+
+
+@pipeline_bp.route("/genai-demo", methods=["GET", "POST"])
+def genai_demo():
+    """Executa uma demonstracao da camada GenAI complementar ao baseline."""
+    macro_options = get_demo_macro_options(current_app.config["ARTIFACTS_FOLDER"])
+    selected_macro = request.form.get("macro_class", macro_options[0]["macro_class"] if macro_options else "")
+    selected_entry = next(
+        (item for item in macro_options if item["macro_class"] == selected_macro),
+        macro_options[0] if macro_options else {"macro_class": "", "detail_options": []},
+    )
+    text_input = request.form.get("text_input", "")
+    genai_result = None
+
+    if request.method == "POST":
+        try:
+            refiner = GenAIRefiner(get_genai_settings_from_config(current_app.config))
+            genai_result = refiner.refine(
+                text=text_input,
+                predicted_macro=selected_macro,
+                valid_detailed_classes=selected_entry["detail_options"],
+                few_shot_examples=get_demo_few_shot_examples(),
+            )
+            flash(
+                "A camada GenAI retornou uma sugestao estruturada para complementar o baseline.",
+                "success",
+            )
+        except GenAIRefinerError as exc:
+            flash(str(exc), "warning")
+        except Exception:
+            current_app.logger.exception("Erro inesperado durante a demonstracao GenAI.")
+            flash("Nao foi possivel executar a demonstracao GenAI.", "danger")
+
+    return render_template(
+        "genai_demo.html",
+        macro_options=macro_options,
+        selected_macro=selected_macro,
+        selected_entry=selected_entry,
+        text_input=text_input,
+        genai_result=genai_result,
+    )
+
+
+@pipeline_bp.get("/results")
+def results():
+    """Renderiza uma visao placeholder para as saidas do fluxo."""
+    context = {
+        "validation_summary": get_validation_placeholder(),
+        "eda_summary": get_eda_placeholder(),
+        "baseline_summary": get_baseline_placeholder(),
+        "generative_summary": get_generative_placeholder(),
+    }
+    return render_template("results.html", **context)

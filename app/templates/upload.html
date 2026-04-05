@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block title %}{{ app_name }} | Upload{% endblock %}
+
+{% block content %}
+<section class="section-heading">
+    <div>
+        <p class="eyebrow">Modulo de ingestao</p>
+        <h1>Upload de CSV</h1>
+    </div>
+    <p>Envie uma base textual em formato CSV para iniciar o fluxo de validacao, exploracao e classificacao.</p>
+</section>
+
+<section class="panel panel-upload">
+    <div>
+        <h2>Entrada inicial do pipeline</h2>
+        <p>
+            Esta camada recebe o arquivo, valida o formato, checa a estrutura do dataset e persiste o CSV em
+            <code>data/raw/</code>.
+        </p>
+        <div class="expected-columns">
+            <h3>Colunas obrigatorias</h3>
+            <ul class="tag-list">
+                {% for column in expected_columns %}
+                    <li>{{ column }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+    <form method="post" enctype="multipart/form-data" class="upload-form">
+        <label for="dataset">Arquivo CSV</label>
+        <input id="dataset" name="dataset" type="file" accept=".csv">
+        <button type="submit" class="button button-primary">Enviar arquivo</button>
+    </form>
+</section>
+
+{% if ingest_result %}
+    <section class="section-heading">
+        <div>
+            <p class="eyebrow">Resumo da ingestao</p>
+            <h2>Arquivo validado com sucesso</h2>
+        </div>
+        <div class="section-heading__actions">
+            <p>Os dados abaixo refletem a leitura inicial do CSV salvo em <code>data/raw/</code>.</p>
+            <div class="action-row">
+                <a class="button button-secondary" href="{{ url_for('pipeline.eda') }}">Abrir analise exploratoria</a>
+                <a class="button button-secondary" href="{{ url_for('pipeline.baseline') }}">Treinar baseline</a>
+            </div>
+        </div>
+    </section>
+
+    <section class="card-grid">
+        <article class="card">
+            <p class="status">Arquivo</p>
+            <h3>{{ ingest_result.summary.filename }}</h3>
+            <p>Nome final persistido apos a validacao.</p>
+        </article>
+        <article class="card">
+            <p class="status">Linhas</p>
+            <h3>{{ ingest_result.summary.row_count }}</h3>
+            <p>Quantidade total de registros identificados.</p>
+        </article>
+        <article class="card">
+            <p class="status">Colunas</p>
+            <h3>{{ ingest_result.summary.column_count }}</h3>
+            <p>Total de campos presentes no dataset.</p>
+        </article>
+        <article class="card">
+            <p class="status">Destino</p>
+            <h3>data/raw</h3>
+            <p>Camada de armazenamento bruto para a etapa de ingestao.</p>
+        </article>
+    </section>
+
+    <section class="panel">
+        <h2>Colunas detectadas</h2>
+        <ul class="tag-list">
+            {% for column in ingest_result.summary.columns %}
+                <li>{{ column }}</li>
+            {% endfor %}
+        </ul>
+    </section>
+
+    <section class="panel">
+        <div class="table-header">
+            <div>
+                <p class="eyebrow">Preview</p>
+                <h2>Primeiras 10 linhas</h2>
+            </div>
+            <p>Pre-visualizacao gerada a partir do DataFrame carregado com pandas.</p>
+        </div>
+
+        <div class="table-wrapper">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        {% for column in ingest_result.summary.preview_columns %}
+                            <th>{{ column }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in ingest_result.summary.preview_rows %}
+                        <tr>
+                            {% for column in ingest_result.summary.preview_columns %}
+                                <td>{{ row[column] }}</td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+{% endif %}
+{% endblock %}

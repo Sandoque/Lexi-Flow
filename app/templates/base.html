@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="LexiFlow e uma plataforma Flask para classificacao textual com NLP e IA generativa.">
+    <title>{% block title %}{{ app_name }}{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    {% block head %}{% endblock %}
+</head>
+<body>
+    <header class="site-header">
+        <div class="container">
+            <div class="site-header__content">
+                <a class="brand" href="{{ url_for('main.index') }}">
+                    <span class="brand__mark">LF</span>
+                    <span class="brand__text">
+                        <strong>{{ app_name }}</strong>
+                        <small>{{ app_subtitle }}</small>
+                    </span>
+                </a>
+                <nav class="nav">
+                    <a href="{{ url_for('main.index') }}">Inicio</a>
+                    <a href="{{ url_for('pipeline.upload') }}">Upload CSV</a>
+                    <a href="{{ url_for('pipeline.eda') }}">EDA</a>
+                    <a href="{{ url_for('pipeline.baseline') }}">Baseline</a>
+                    <a href="{{ url_for('pipeline.genai_demo') }}">GenAI Demo</a>
+                    <a href="{{ url_for('pipeline.results') }}">Resultados</a>
+                    <a href="{{ url_for('main.health') }}">Health</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="container main-content">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <section class="flash-list" aria-label="Mensagens do sistema">
+                        {% for category, message in messages %}
+                            <article class="flash flash-{{ category }}" data-flash>
+                                <div>
+                                    <strong>{{ category|capitalize }}</strong>
+                                    <p>{{ message }}</p>
+                                </div>
+                                <button type="button" class="flash__close" data-flash-close aria-label="Fechar mensagem">
+                                    Fechar
+                                </button>
+                            </article>
+                        {% endfor %}
+                    </section>
+                {% endif %}
+            {% endwith %}
+
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container site-footer__content">
+            <p>{{ app_name }} organiza ingestao, classificacao e revisao assistida para casos de NLP aplicado.</p>
+            <span id="footer-status">Aplicacao pronta para evolucao incremental.</span>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}" defer></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

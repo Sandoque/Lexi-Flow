@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}{{ app_name }} | Inicio{% endblock %}
+
+{% block content %}
+<section class="hero-panel">
+    <div class="hero-panel__content">
+        <p class="eyebrow">Case de NLP e IA generativa</p>
+        <h1>{{ app_name }}</h1>
+        <p class="hero-panel__subtitle">{{ app_subtitle }}</p>
+        <p class="hero-panel__description">
+            Aplicacao web para receber bases textuais em CSV, validar estrutura, explorar o corpus,
+            produzir uma classificacao baseline e abrir espaco para refinamento com IA generativa.
+        </p>
+        <div class="hero-panel__actions">
+            <a class="button button-primary" href="{{ url_for('pipeline.upload') }}">Ir para upload do CSV</a>
+            <a class="button button-secondary" href="{{ url_for('main.health') }}">Ver healthcheck</a>
+        </div>
+    </div>
+    <aside class="hero-panel__highlight">
+        <p class="highlight-label">Estado da plataforma</p>
+        <strong>Primeira versao funcional</strong>
+        <span>Base Flask pronta para evoluir o pipeline de classificacao textual com separacao por camadas.</span>
+    </aside>
+</section>
+
+<section class="section-heading">
+    <div>
+        <p class="eyebrow">Camadas da solucao</p>
+        <h2>Fluxo pensado para crescer com o case</h2>
+    </div>
+    <p>
+        A estrutura atual organiza responsabilidades tecnicas desde a entrada do dado ate a operacao assistida,
+        facilitando testes, manutencao e futura integracao com modelos e observabilidade.
+    </p>
+</section>
+
+<section class="card-grid">
+    {% for layer in solution_layers %}
+        <article class="card card-layer">
+            <span class="card-layer__order">{{ layer.order }}</span>
+            <h3>{{ layer.title }}</h3>
+            <p>{{ layer.description }}</p>
+        </article>
+    {% endfor %}
+</section>
+
+<section class="info-strip">
+    <div>
+        <p class="eyebrow">Proximo passo natural</p>
+        <h2>Conectar a area de upload ao pipeline de validacao</h2>
+    </div>
+    <a class="button button-primary" href="{{ url_for('pipeline.upload') }}">Abrir modulo de ingestao</a>
+</section>
+{% endblock %}
