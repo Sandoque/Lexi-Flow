@@ -4,6 +4,7 @@ from io import BytesIO
 from pathlib import Path
 
 from app import create_app
+from app.services.genai_refiner import OpenAICompatibleProvider
 
 
 def test_create_app_uses_testing_config():
@@ -178,4 +179,64 @@ def test_genai_demo_route_classifies_text_in_mock_mode(tmp_path: Path):
     assert response.status_code == 200
     assert b"Sugestao do LLM" in response.data
     assert b"Boleto" in response.data
+    assert b"mock" in response.data
+
+
+def test_genai_demo_route_shows_friendly_error_when_groq_has_no_key(tmp_path: Path):
+    """Garante mensagem amigavel quando Groq foi solicitado sem chave."""
+    app = create_app("testing")
+    app.config["ARTIFACTS_FOLDER"] = tmp_path / "artifacts"
+    app.config["GENAI_PROVIDER"] = "groq"
+    app.config["GENAI_MOCK_MODE"] = False
+    app.config["GENAI_API_KEY"] = ""
+    app.config["GROQ_API_KEY"] = ""
+    client = app.test_client()
+
+    response = client.post(
+        "/genai-demo",
+        data={
+            "macro_class": "Financeiro",
+            "text_input": "Preciso da segunda via do boleto com urgencia.",
+        },
+    )
+
+    assert response.status_code == 200
+    assert b"Nenhuma chave foi configurada para Groq" in response.data
+
+
+def test_genai_demo_route_falls_back_to_mock_when_remote_provider_fails(
+    monkeypatch,
+    tmp_path: Path,
+):
+    """Garante que a interface continua operante com fallback para mock."""
+
+    def fake_generate(self: OpenAICompatibleProvider, prompt: str) -> str:
+        return self._fallback_to_mock(prompt, reason="falha de rede na chamada do provider")
+
+    monkeypatch.setattr(
+        OpenAICompatibleProvider,
+        "generate_structured_completion",
+        fake_generate,
+    )
+
+    app = create_app("testing")
+    app.config["ARTIFACTS_FOLDER"] = tmp_path / "artifacts"
+    app.config["GENAI_PROVIDER"] = "groq"
+    app.config["GENAI_MOCK_MODE"] = False
+    app.config["GENAI_API_KEY"] = ""
+    app.config["GROQ_API_KEY"] = "groq-secret"
+    app.config["GENAI_MODEL"] = "llama-3.3-70b-versatile"
+    client = app.test_client()
+
+    response = client.post(
+        "/genai-demo",
+        data={
+            "macro_class": "Financeiro",
+            "text_input": "Preciso da segunda via do boleto com urgencia.",
+        },
+    )
+
+    assert response.status_code == 200
+    assert b"Fallback aplicado" in response.data
+    assert b"Provider efetivo" in response.data
     assert b"mock" in response.data

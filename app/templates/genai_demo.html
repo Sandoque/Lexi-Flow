@@ -78,8 +78,12 @@
 {% if genai_result %}
     <section class="metrics-grid">
         <article class="metric-card">
-            <span>Provider</span>
+            <span>Provider efetivo</span>
             <strong>{{ genai_result.provider }}</strong>
+        </article>
+        <article class="metric-card">
+            <span>Provider solicitado</span>
+            <strong>{{ genai_result.requested_provider }}</strong>
         </article>
         <article class="metric-card">
             <span>Modelo</span>
@@ -94,6 +98,19 @@
             <strong>{% if genai_result.result.ambiguous_case %}Sim{% else %}Nao{% endif %}</strong>
         </article>
     </section>
+
+    {% if genai_result.fallback_reason %}
+        <section class="panel">
+            <h2>Fallback aplicado</h2>
+            <p>
+                O provider remoto falhou e a resposta foi gerada em modo mock para manter a demonstracao operante.
+            </p>
+            <ul class="distribution-list">
+                <li><span>Motivo</span><strong>{{ genai_result.fallback_reason }}</strong></li>
+                <li><span>Origem da chave</span><strong>{{ genai_result.api_key_source or "nao aplicavel" }}</strong></li>
+            </ul>
+        </section>
+    {% endif %}
 
     <section class="charts-grid">
         <article class="panel chart-panel">

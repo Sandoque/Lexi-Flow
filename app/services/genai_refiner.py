@@ -32,9 +32,11 @@ class FewShotExample:
 class GenAISettings:
     """Configuracoes operacionais da camada GenAI."""
 
-    provider: str
+    requested_provider: str
+    effective_provider: str
     model: str
     api_key: str | None
+    api_key_source: str | None
     base_url: str | None
     temperature: float
     timeout_seconds: int
@@ -46,6 +48,11 @@ class GenAIRefiner:
 
     def __init__(self, settings: GenAISettings):
         self.settings = settings
+        logger.info(
+            "GenAI inicializado com provider solicitado='%s' e provider efetivo='%s'.",
+            settings.requested_provider,
+            settings.effective_provider,
+        )
         self.provider = build_provider(settings)
 
     def refine(
@@ -73,9 +80,12 @@ class GenAIRefiner:
         parsed = parse_refiner_response(raw_response, valid_detailed_classes)
 
         return {
-            "provider": self.settings.provider,
+            "provider": self.provider.active_provider,
+            "requested_provider": self.settings.requested_provider,
+            "api_key_source": self.settings.api_key_source,
             "model": self.settings.model,
-            "mode": "mock" if self.settings.mock_mode else "api",
+            "mode": self.provider.active_mode,
+            "fallback_reason": self.provider.fallback_reason,
             "prompt": prompt,
             "result": parsed,
         }
@@ -86,6 +96,9 @@ class BaseGenAIProvider:
 
     def __init__(self, settings: GenAISettings):
         self.settings = settings
+        self.active_provider = settings.effective_provider
+        self.active_mode = "mock" if settings.mock_mode else "api"
+        self.fallback_reason: str | None = None
 
     def generate_structured_completion(self, prompt: str) -> str:
         """Gera resposta textual estruturada a partir do prompt."""
@@ -96,6 +109,8 @@ class MockGenAIProvider(BaseGenAIProvider):
     """Provider fake para demonstracao local e desenvolvimento sem custo."""
 
     def generate_structured_completion(self, prompt: str) -> str:
+        self.active_provider = "mock"
+        self.active_mode = "mock"
         payload = extract_payload_from_prompt(prompt)
         valid_classes = payload["valid_detailed_classes"]
         text = payload["text"].lower()
@@ -122,13 +137,17 @@ class OpenAICompatibleProvider(BaseGenAIProvider):
     """Provider generico para APIs compatíveis com o cliente OpenAI."""
 
     def generate_structured_completion(self, prompt: str) -> str:
+        self.active_provider = self.settings.effective_provider
+        self.active_mode = "api"
+        self.fallback_reason = None
         if not self.settings.api_key:
             raise GenAIRefinerError(
-                "A chave da API nao foi configurada. Defina GENAI_API_KEY ou a chave especifica do provider."
+                build_missing_api_key_message(self.settings)
             )
 
         try:
             from openai import OpenAI
+            from openai import APIConnectionError, APITimeoutError, AuthenticationError
         except ImportError as exc:
             raise GenAIRefinerError("O pacote openai nao esta disponivel no ambiente atual.") from exc
 
@@ -137,36 +156,75 @@ class OpenAICompatibleProvider(BaseGenAIProvider):
             base_url=self.settings.base_url or None,
             timeout=self.settings.timeout_seconds,
         )
-        response = client.chat.completions.create(
-            model=self.settings.model,
-            temperature=self.settings.temperature,
-            messages=[
-                {
-                    "role": "system",
-                    "content": (
-                        "Voce e um assistente de classificacao textual operacional. "
-                        "Responda somente com JSON valido."
-                    ),
-                },
-                {"role": "user", "content": prompt},
-            ],
-            response_format={"type": "json_object"},
-        )
+        try:
+            response = client.chat.completions.create(
+                model=self.settings.model,
+                temperature=self.settings.temperature,
+                messages=[
+                    {
+                        "role": "system",
+                        "content": (
+                            "Voce e um assistente de classificacao textual operacional. "
+                            "Responda somente com JSON valido."
+                        ),
+                    },
+                    {"role": "user", "content": prompt},
+                ],
+                response_format={"type": "json_object"},
+            )
+        except AuthenticationError as exc:
+            logger.warning(
+                "Falha de autenticacao no provider '%s'.",
+                self.settings.effective_provider,
+            )
+            raise GenAIRefinerError(
+                "Falha de autenticacao no provider configurado. Revise a API key e tente novamente."
+            ) from exc
+        except APITimeoutError as exc:
+            logger.warning(
+                "Timeout no provider '%s'. Tentando fallback para mock.",
+                self.settings.effective_provider,
+            )
+            return self._fallback_to_mock(prompt, reason="timeout na chamada do provider")
+        except APIConnectionError as exc:
+            logger.warning(
+                "Erro de rede no provider '%s'. Tentando fallback para mock.",
+                self.settings.effective_provider,
+            )
+            return self._fallback_to_mock(prompt, reason="falha de rede na chamada do provider")
+        except Exception as exc:
+            logger.exception(
+                "Erro inesperado no provider '%s'. Aplicando fallback para mock.",
+                self.settings.effective_provider,
+            )
+            return self._fallback_to_mock(prompt, reason="erro inesperado na chamada do provider")
+
         content = response.choices[0].message.content
         if not content:
             raise GenAIRefinerError("O provider retornou uma resposta vazia.")
         return content
 
+    def _fallback_to_mock(self, prompt: str, reason: str) -> str:
+        """Aplica fallback controlado para mock sem quebrar a interface."""
+        self.active_provider = "mock"
+        self.active_mode = "mock"
+        self.fallback_reason = reason
+        return fallback_to_mock_response(
+            settings=self.settings,
+            prompt=prompt,
+            reason=reason,
+        )
+
 
 def build_provider(settings: GenAISettings) -> BaseGenAIProvider:
     """Constroi o provider de acordo com a configuracao."""
-    if settings.mock_mode or settings.provider == "mock":
+    if settings.mock_mode or settings.effective_provider == "mock":
         return MockGenAIProvider(settings)
 
-    if settings.provider in {"openai", "groq", "openai_compatible"}:
+    if settings.effective_provider in {"openai", "groq", "openai_compatible"}:
         return OpenAICompatibleProvider(settings)
 
-    raise GenAIRefinerError(f"Provider GenAI nao suportado: {settings.provider}.")
+    raise GenAIRefinerError(f"Provider GenAI nao suportado: {settings.effective_provider}.")
 
 
 def get_genai_settings_from_config(config: Any) -> GenAISettings:
@@ -177,22 +235,85 @@ def get_genai_settings_from_config(config: Any) -> GenAISettings:
         mock_mode = raw_mock_mode.strip().lower() in {"1", "true", "yes", "on"}
     else:
         mock_mode = bool(raw_mock_mode)
-    mock_mode = mock_mode or provider == "mock"
-    api_key = (
-        config.get("GENAI_API_KEY")
-        or config.get("OPENAI_API_KEY")
-        or config.get("GROQ_API_KEY")
-    )
+    resolved = resolve_effective_provider_settings(config, provider=provider, mock_mode=mock_mode)
 
     return GenAISettings(
-        provider=provider,
+        requested_provider=provider,
+        effective_provider=resolved["effective_provider"],
         model=str(config.get("GENAI_MODEL", "mock-model")),
-        api_key=api_key,
-        base_url=config.get("GENAI_BASE_URL"),
+        api_key=resolved["api_key"],
+        api_key_source=resolved["api_key_source"],
+        base_url=resolved["base_url"],
         temperature=float(config.get("GENAI_TEMPERATURE", 0.1)),
         timeout_seconds=int(config.get("GENAI_TIMEOUT_SECONDS", 30)),
-        mock_mode=mock_mode,
+        mock_mode=resolved["mock_mode"],
     )
+
+
+def resolve_effective_provider_settings(
+    config: Any,
+    provider: str,
+    mock_mode: bool,
+) -> dict[str, Any]:
+    """Resolve provider efetivo, origem da chave e base URL sem expor segredos."""
+    if mock_mode or provider == "mock":
+        logger.info("GenAI configurado para usar modo mock.")
+        return {
+            "effective_provider": "mock",
+            "api_key": None,
+            "api_key_source": None,
+            "base_url": None,
+            "mock_mode": True,
+        }
+
+    if provider == "groq":
+        genai_key = normalize_optional_string(config.get("GENAI_API_KEY"))
+        groq_key = normalize_optional_string(config.get("GROQ_API_KEY"))
+        base_url = normalize_optional_string(config.get("GENAI_BASE_URL")) or "https://api.groq.com/openai/v1"
+
+        if genai_key:
+            api_key = genai_key
+            api_key_source = "GENAI_API_KEY"
+        elif groq_key:
+            api_key = groq_key
+            api_key_source = "GROQ_API_KEY"
+        else:
+            api_key = None
+            api_key_source = None
+
+        logger.info(
+            "GenAI configurado para usar Groq com base_url='%s' e origem de chave='%s'.",
+            base_url,
+            api_key_source or "nenhuma",
+        )
+        return {
+            "effective_provider": "groq",
+            "api_key": api_key,
+            "api_key_source": api_key_source,
+            "base_url": base_url,
+            "mock_mode": False,
+        }
+
+    openai_key = normalize_optional_string(config.get("GENAI_API_KEY")) or normalize_optional_string(
+        config.get("OPENAI_API_KEY")
+    )
+    api_key_source = "GENAI_API_KEY" if normalize_optional_string(config.get("GENAI_API_KEY")) else (
+        "OPENAI_API_KEY" if normalize_optional_string(config.get("OPENAI_API_KEY")) else None
+    )
+    base_url = normalize_optional_string(config.get("GENAI_BASE_URL"))
+
+    logger.info(
+        "GenAI configurado para usar provider '%s' com origem de chave='%s'.",
+        provider,
+        api_key_source or "nenhuma",
+    )
+    return {
+        "effective_provider": provider,
+        "api_key": openai_key,
+        "api_key_source": api_key_source,
+        "base_url": base_url,
+        "mock_mode": False,
+    }
 
 
 def build_structured_prompt(
@@ -319,6 +440,49 @@ def extract_payload_from_prompt(prompt: str) -> dict:
         return json.loads(prompt)
     except json.JSONDecodeError as exc:
         raise GenAIRefinerError("Nao foi possivel interpretar o prompt estruturado.") from exc
+
+
+def fallback_to_mock_response(settings: GenAISettings, prompt: str, reason: str) -> str:
+    """Executa fallback seguro para mock quando o provider remoto falha."""
+    logger.warning(
+        "Fallback automatico para mock ativado. Provider solicitado='%s', motivo='%s'.",
+        settings.requested_provider,
+        reason,
+    )
+    mock_settings = GenAISettings(
+        requested_provider=settings.requested_provider,
+        effective_provider="mock",
+        model="mock-fallback",
+        api_key=None,
+        api_key_source=None,
+        base_url=None,
+        temperature=settings.temperature,
+        timeout_seconds=settings.timeout_seconds,
+        mock_mode=True,
+    )
+    provider = MockGenAIProvider(mock_settings)
+    return provider.generate_structured_completion(prompt)
+
+
+def build_missing_api_key_message(settings: GenAISettings) -> str:
+    """Monta uma mensagem amigavel para ausencia de credencial."""
+    if settings.effective_provider == "groq":
+        return (
+            "Nenhuma chave foi configurada para Groq. Defina GENAI_API_KEY ou GROQ_API_KEY em secret.env "
+            "ou nas variaveis do sistema."
+        )
+    return (
+        "Nenhuma chave foi configurada para o provider GenAI. Defina GENAI_API_KEY "
+        "ou a chave especifica do provider."
+    )
+
+
+def normalize_optional_string(value: Any) -> str | None:
+    """Normaliza strings opcionais vindas da configuracao."""
+    if value is None:
+        return None
+    normalized = str(value).strip()
+    return normalized or None
 
 
 def choose_mock_class(text: str, valid_classes: list[str]) -> str:
