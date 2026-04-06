@@ -14,6 +14,24 @@
     </p>
 </section>
 
+<section class="panel dataset-mode-panel">
+    <div>
+        <p class="eyebrow">Fonte ativa</p>
+        <h2>{{ eda_result.dataset.source_label }}</h2>
+        <p>
+            {% if eda_result.dataset.is_demo %}
+                Esta analise esta usando o dataset demo da apresentacao.
+            {% else %}
+                Esta analise esta usando o ultimo upload disponivel na sessao.
+            {% endif %}
+        </p>
+    </div>
+    <div class="action-row">
+        <a class="button {% if not using_demo_dataset %}button-primary{% else %}button-secondary{% endif %}" href="{{ url_for('pipeline.eda', dataset_source='upload') }}">Usar ultimo upload</a>
+        <a class="button {% if using_demo_dataset %}button-primary{% else %}button-secondary{% endif %}" href="{{ url_for('pipeline.eda', dataset_source='demo') }}">Usar dataset demo</a>
+    </div>
+</section>
+
 <section class="hero-panel hero-panel--compact">
     <div class="hero-panel__content">
         <p class="eyebrow">Arquivo analisado</p>

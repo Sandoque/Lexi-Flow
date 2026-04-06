@@ -1,0 +1,13 @@
+id_registro,texto,canal_origem,data,classe_macro,classe_detalhada
+1,Erro no login do portal do cliente,email,2026-03-01,Suporte,Login
+2,Preciso redefinir minha senha porque nao consigo entrar,chat,2026-03-02,Suporte,Senha
+3,Nao consigo anexar o documento solicitado na plataforma,portal,2026-03-03,Suporte,Anexo
+4,Quero a segunda via do boleto deste mes,email,2026-03-04,Financeiro,Boleto
+5,Existe uma cobranca em aberto que nao reconheco,telefone,2026-03-05,Financeiro,Cobranca
+6,Pagamento realizado ainda nao apareceu no sistema,whatsapp,2026-03-06,Financeiro,Pagamento
+7,Preciso atualizar meus dados cadastrais,portal,2026-03-07,Cadastro,Atualizacao
+8,Quero alterar o endereco registrado no cadastro,chat,2026-03-08,Cadastro,Endereco
+9,Meu acesso foi bloqueado apos varias tentativas de login,email,2026-03-09,Suporte,Login
+10,Esqueci a senha e preciso recuperar com urgencia,chat,2026-03-10,Suporte,Senha
+11,Podem enviar novamente o boleto vencido para pagamento hoje,email,2026-03-11,Financeiro,Boleto
+12,Preciso corrigir meu telefone e email no cadastro,portal,2026-03-12,Cadastro,Contato

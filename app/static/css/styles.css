@@ -163,6 +163,13 @@ main {
     align-self: stretch;
 }
 
+.dataset-mode-panel {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
 .hierarchy-flow {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -875,6 +882,7 @@ code {
     .site-footer__content,
     .text-extremes,
     .baseline-toolbar,
+    .dataset-mode-panel,
     .examples-grid--wide {
         grid-template-columns: 1fr;
         display: grid;

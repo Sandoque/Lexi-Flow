@@ -125,8 +125,31 @@ def test_eda_route_redirects_when_no_dataset(tmp_path: Path):
     response = client.get("/eda", follow_redirects=True)
 
     assert response.status_code == 200
-    assert b"Nenhum CSV disponivel para analise" in response.data
+    assert b"Nenhum dataset disponivel para analise" in response.data
     assert b"Upload de CSV" in response.data
+
+
+def test_eda_route_can_use_demo_dataset(tmp_path: Path):
+    """Garante que a EDA funciona com dataset demo configurado."""
+    app = create_app("testing")
+    app.config["UPLOAD_FOLDER"] = tmp_path / "raw"
+    app.config["DEMO_DATASET_PATH"] = tmp_path / "demo.csv"
+    app.config["USE_DEMO_DATASET_BY_DEFAULT"] = False
+    app.config["DEMO_DATASET_PATH"].write_text(
+        (
+            "id_registro,texto,canal_origem,data,classe_macro,classe_detalhada\n"
+            "1,Texto demo,email,2026-04-04,Financeiro,Boleto\n"
+            "2,Outro texto demo,chat,2026-04-05,Suporte,Login\n"
+        ),
+        encoding="utf-8",
+    )
+    client = app.test_client()
+
+    response = client.get("/eda?dataset_source=demo")
+
+    assert response.status_code == 200
+    assert b"dataset demo" in response.data
+    assert b"Financeiro" in response.data
 
 
 def test_baseline_route_trains_with_valid_dataset(tmp_path: Path):
@@ -156,6 +179,35 @@ def test_baseline_route_trains_with_valid_dataset(tmp_path: Path):
     assert b"Nivel 1" in response.data
     assert b"Nivel 2" in response.data
     assert b"Matriz de confusao" in response.data
+
+
+def test_baseline_route_can_train_with_demo_dataset(tmp_path: Path):
+    """Garante treino baseline usando o dataset demo sem upload manual."""
+    app = create_app("testing")
+    app.config["UPLOAD_FOLDER"] = tmp_path / "raw"
+    app.config["ARTIFACTS_FOLDER"] = tmp_path / "artifacts"
+    app.config["DEMO_DATASET_PATH"] = tmp_path / "demo.csv"
+    app.config["DEMO_DATASET_PATH"].write_text(
+        (
+            "id_registro,texto,canal_origem,data,classe_macro,classe_detalhada\n"
+            "1,Erro no login,email,2026-04-04,Suporte,Login\n"
+            "2,Esqueci a senha,chat,2026-04-05,Suporte,Senha\n"
+            "3,Preciso da segunda via do boleto,email,2026-04-06,Financeiro,Boleto\n"
+            "4,Existe cobranca indevida,telefone,2026-04-07,Financeiro,Cobranca\n"
+            "5,Quero atualizar meus dados,portal,2026-04-08,Cadastro,Atualizacao\n"
+            "6,Quero alterar o endereco,portal,2026-04-09,Cadastro,Endereco\n"
+            "7,Acesso bloqueado na conta,email,2026-04-10,Suporte,Login\n"
+            "8,Boleto vencido para pagar hoje,email,2026-04-11,Financeiro,Boleto\n"
+        ),
+        encoding="utf-8",
+    )
+    client = app.test_client()
+
+    response = client.get("/baseline?dataset_source=demo")
+
+    assert response.status_code == 200
+    assert b"dataset demo" in response.data
+    assert b"Painel supervisionado em dois niveis" in response.data
 
 
 def test_genai_demo_route_renders_with_mock_mode(tmp_path: Path):
@@ -309,3 +361,45 @@ def test_predict_route_runs_end_to_end_in_mock_mode(tmp_path: Path):
     assert b"Financeiro" in response.data
     assert b"Boleto" in response.data
     assert b"Provider usado" in response.data
+
+
+def test_predict_route_shows_demo_model_source(tmp_path: Path):
+    """Garante que a inferencia deixa claro quando os artefatos vieram do dataset demo."""
+    app = create_app("testing")
+    app.config["UPLOAD_FOLDER"] = tmp_path / "raw"
+    app.config["ARTIFACTS_FOLDER"] = tmp_path / "artifacts"
+    app.config["DEMO_DATASET_PATH"] = tmp_path / "demo.csv"
+    app.config["GENAI_PROVIDER"] = "mock"
+    app.config["GENAI_MOCK_MODE"] = True
+    app.config["DEMO_DATASET_PATH"].write_text(
+        (
+            "id_registro,texto,canal_origem,data,classe_macro,classe_detalhada\n"
+            "1,Erro no login,email,2026-04-04,Suporte,Login\n"
+            "2,Esqueci a senha,chat,2026-04-05,Suporte,Senha\n"
+            "3,Preciso da segunda via do boleto,email,2026-04-06,Financeiro,Boleto\n"
+            "4,Existe cobranca indevida,telefone,2026-04-07,Financeiro,Cobranca\n"
+            "5,Quero atualizar meus dados,portal,2026-04-08,Cadastro,Atualizacao\n"
+            "6,Quero alterar o endereco,portal,2026-04-09,Cadastro,Endereco\n"
+            "7,Acesso bloqueado na conta,email,2026-04-10,Suporte,Login\n"
+            "8,Boleto vencido para pagar hoje,email,2026-04-11,Financeiro,Boleto\n"
+        ),
+        encoding="utf-8",
+    )
+    client = app.test_client()
+
+    baseline_response = client.get("/baseline?dataset_source=demo")
+
+    assert baseline_response.status_code == 200
+
+    response = client.post(
+        "/predict",
+        data={
+            "channel_origin": "Email",
+            "text_input": "Preciso da segunda via do boleto com urgencia hoje.",
+            "dataset_source": "demo",
+        },
+    )
+
+    assert response.status_code == 200
+    assert b"Fonte do modelo atual" in response.data
+    assert b"dataset demo" in response.data

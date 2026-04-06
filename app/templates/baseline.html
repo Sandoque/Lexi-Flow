@@ -14,6 +14,24 @@
     </p>
 </section>
 
+<section class="panel dataset-mode-panel">
+    <div>
+        <p class="eyebrow">Fonte de treinamento</p>
+        <h2>{{ baseline_result.dataset.source_label }}</h2>
+        <p>
+            {% if baseline_result.dataset.is_demo %}
+                O baseline foi treinado com o dataset demo, ideal para apresentacoes e navegacao guiada.
+            {% else %}
+                O baseline foi treinado com o ultimo upload disponivel na aplicacao.
+            {% endif %}
+        </p>
+    </div>
+    <div class="action-row">
+        <a class="button {% if not using_demo_dataset %}button-primary{% else %}button-secondary{% endif %}" href="{{ url_for('pipeline.baseline', dataset_source='upload') }}">Treinar com ultimo upload</a>
+        <a class="button {% if using_demo_dataset %}button-primary{% else %}button-secondary{% endif %}" href="{{ url_for('pipeline.baseline', dataset_source='demo') }}">Treinar com dataset demo</a>
+    </div>
+</section>
+
 <section class="panel hierarchy-flow">
     <article class="hierarchy-step">
         <span class="card-layer__order">Nivel 1</span>

@@ -130,6 +130,9 @@ def executar_fluxo_predicao(
             "detailed_models_ready": True,
             "trained_at": artifacts["metadata"].get("trained_at"),
             "dataset_path": artifacts["metadata"].get("dataset_path"),
+            "dataset_source": artifacts["metadata"].get("dataset_source", "upload"),
+            "dataset_source_label": artifacts["metadata"].get("dataset_source_label", "ultimo upload"),
+            "dataset_is_demo": bool(artifacts["metadata"].get("dataset_is_demo", False)),
         },
     }
 

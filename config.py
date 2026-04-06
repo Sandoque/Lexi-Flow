@@ -101,6 +101,8 @@ class Config:
     UPLOAD_FOLDER = BASE_DIR / "data" / "raw"
     PROCESSED_FOLDER = BASE_DIR / "data" / "processed"
     ARTIFACTS_FOLDER = BASE_DIR / "data" / "artifacts"
+    DEMO_DATASET_PATH = Path(resolve_setting("DEMO_DATASET_PATH", str(BASE_DIR / "data" / "demo" / "lexiflow_demo_dataset.csv")))
+    USE_DEMO_DATASET_BY_DEFAULT = resolve_bool_setting("USE_DEMO_DATASET_BY_DEFAULT", False)
     ALLOWED_EXTENSIONS = {"csv"}
     OPENAI_API_KEY = resolve_setting("OPENAI_API_KEY")
     GROQ_API_KEY = resolve_setting("GROQ_API_KEY")

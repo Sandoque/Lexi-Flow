@@ -29,6 +29,7 @@ def prepare_directories(app: Flask) -> None:
     ensure_directory(app.config["UPLOAD_FOLDER"])
     ensure_directory(app.config["PROCESSED_FOLDER"])
     ensure_directory(app.config["ARTIFACTS_FOLDER"])
+    ensure_directory(Path(app.config["DEMO_DATASET_PATH"]).parent)
 
 
 def register_context_processors(app: Flask) -> None:

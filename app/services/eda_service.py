@@ -9,7 +9,7 @@ from pandas.errors import EmptyDataError, ParserError
 
 from app.services.ingest_service import REQUIRED_COLUMNS
 from app.utils.chart_builders import gerar_grafico_barras_base64
-from app.utils.dataset_locator import localizar_dataset_disponivel
+from app.utils.dataset_locator import DatasetSelection, localizar_dataset_disponivel
 from app.utils.text_statistics import calcular_estatisticas_textuais, resumir_texto
 
 
@@ -20,11 +20,21 @@ class EDAError(Exception):
 def carregar_eda_do_ultimo_dataset(
     upload_folder: str | Path,
     preferred_path: str | None = None,
+    demo_dataset_path: str | Path | None = None,
+    dataset_source: str | None = None,
+    use_demo_by_default: bool = False,
     example_limit: int = 2,
     top_detailed_limit: int = 8,
 ) -> dict:
     """Carrega o ultimo dataset disponivel e gera sua analise exploratoria."""
-    dataset_path = localizar_dataset_mais_recente(upload_folder, preferred_path)
+    dataset_selection = localizar_dataset_mais_recente(
+        upload_folder=upload_folder,
+        preferred_path=preferred_path,
+        demo_dataset_path=demo_dataset_path,
+        dataset_source=dataset_source,
+        use_demo_by_default=use_demo_by_default,
+    )
+    dataset_path = dataset_selection.path
 
     try:
         dataframe = pd.read_csv(dataset_path)
@@ -56,6 +66,9 @@ def carregar_eda_do_ultimo_dataset(
         "dataset": {
             "filename": dataset_path.name,
             "absolute_path": str(dataset_path),
+            "source": dataset_selection.source,
+            "source_label": dataset_selection.source_label,
+            "is_demo": dataset_selection.is_demo,
             "row_count": int(dataframe.shape[0]),
             "column_count": int(dataframe.shape[1]),
             "columns": list(dataframe.columns),
@@ -99,12 +112,23 @@ def carregar_eda_do_ultimo_dataset(
 def localizar_dataset_mais_recente(
     upload_folder: str | Path,
     preferred_path: str | None = None,
-) -> Path:
-    """Localiza o dataset preferencial da sessao ou o CSV mais recente em data/raw."""
+    demo_dataset_path: str | Path | None = None,
+    dataset_source: str | None = None,
+    use_demo_by_default: bool = False,
+) -> DatasetSelection:
+    """Localiza o dataset ativo conforme a fonte escolhida para a analise."""
     try:
-        return localizar_dataset_disponivel(upload_folder, preferred_path)
+        return localizar_dataset_disponivel(
+            upload_folder=upload_folder,
+            preferred_path=preferred_path,
+            demo_dataset_path=demo_dataset_path,
+            dataset_source=dataset_source,
+            use_demo_by_default=use_demo_by_default,
+        )
     except FileNotFoundError:
-        raise EDAError("Nenhum CSV disponivel para analise. Faca um upload antes de abrir a EDA.")
+        raise EDAError(
+            "Nenhum dataset disponivel para analise. Faca um upload ou configure o dataset demo antes de abrir a EDA."
+        )
 
 
 def validar_colunas_para_eda(dataframe: pd.DataFrame) -> None:

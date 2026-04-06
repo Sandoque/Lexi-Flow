@@ -36,10 +36,28 @@
             reaproveita os artefatos salvos em <code>data/artifacts</code>.
         </p>
         <div class="action-row">
-            <a class="button button-primary" href="{{ url_for('pipeline.baseline') }}">Ir para /baseline</a>
+            <a class="button button-primary" href="{{ url_for('pipeline.baseline', dataset_source=dataset_source) }}">Ir para /baseline</a>
         </div>
     </section>
 {% endif %}
+
+<section class="panel dataset-mode-panel">
+    <div>
+        <p class="eyebrow">Alternancia de fonte</p>
+        <h2>Modo atual para treino: {{ dataset_source_label }}</h2>
+        <p>
+            {% if using_demo_dataset %}
+                Use este modo para apresentacao presencial sem depender de upload ao vivo.
+            {% else %}
+                Use este modo quando quiser treinar e demonstrar com um dataset real carregado na sessao.
+            {% endif %}
+        </p>
+    </div>
+    <div class="action-row">
+        <a class="button {% if not using_demo_dataset %}button-primary{% else %}button-secondary{% endif %}" href="{{ url_for('pipeline.baseline', dataset_source='upload') }}">Treinar com ultimo upload</a>
+        <a class="button {% if using_demo_dataset %}button-primary{% else %}button-secondary{% endif %}" href="{{ url_for('pipeline.baseline', dataset_source='demo') }}">Treinar com dataset demo</a>
+    </div>
+</section>
 
 <section class="panel prediction-layout">
     <div>
@@ -122,6 +140,23 @@
             <span>Provider usado</span>
             <strong>{{ prediction_result.genai.provider }}</strong>
         </article>
+    </section>
+
+    <section class="panel dataset-mode-panel">
+        <div>
+            <p class="eyebrow">Fonte do modelo atual</p>
+            <h2>{{ prediction_result.artifacts.dataset_source_label }}</h2>
+            <p>
+                {% if prediction_result.artifacts.dataset_is_demo %}
+                    Os artefatos usados nesta inferencia foram treinados com o dataset demo.
+                {% else %}
+                    Os artefatos usados nesta inferencia foram treinados com o ultimo upload valido.
+                {% endif %}
+            </p>
+        </div>
+        <div class="action-row">
+            <a class="button button-secondary" href="{{ url_for('pipeline.baseline', dataset_source=prediction_result.artifacts.dataset_source) }}">Reabrir baseline desta fonte</a>
+        </div>
     </section>
 
     <section class="predict-summary-grid">

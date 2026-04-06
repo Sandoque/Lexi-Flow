@@ -26,13 +26,36 @@ from app.services.prediction_service import (
     obter_canais_origem_padrao,
 )
 from app.services.routing_service import obter_legenda_fluxo_operacional
+from app.utils.dataset_locator import resolve_dataset_source
 
 pipeline_bp = Blueprint("pipeline", __name__)
+
+
+def obter_fonte_dataset_ativa() -> str:
+    """Resolve e persiste a fonte ativa de dados para a sessao atual."""
+    source = resolve_dataset_source(
+        requested_source=request.values.get("dataset_source"),
+        current_source=session.get("dataset_source"),
+        use_demo_by_default=bool(current_app.config["USE_DEMO_DATASET_BY_DEFAULT"]),
+    )
+    session["dataset_source"] = source
+    return source
+
+
+def montar_contexto_fonte_dataset(dataset_source: str) -> dict:
+    """Monta contexto simples para indicar a fonte ativa na interface."""
+    return {
+        "dataset_source": dataset_source,
+        "dataset_source_label": "dataset demo" if dataset_source == "demo" else "ultimo upload",
+        "using_demo_dataset": dataset_source == "demo",
+        "demo_dataset_path": str(current_app.config["DEMO_DATASET_PATH"]),
+    }
 
 
 @pipeline_bp.route("/upload", methods=["GET", "POST"])
 def upload():
     """Exibe a tela de upload e processa a ingestao do CSV."""
+    dataset_source = obter_fonte_dataset_ativa()
     ingest_result = None
 
     if request.method == "POST":
@@ -62,16 +85,21 @@ def upload():
         "upload.html",
         ingest_result=ingest_result,
         expected_columns=REQUIRED_COLUMNS,
+        **montar_contexto_fonte_dataset(dataset_source),
     )
 
 
 @pipeline_bp.get("/eda")
 def eda():
     """Exibe a analise exploratoria do ultimo dataset disponivel."""
+    dataset_source = obter_fonte_dataset_ativa()
     try:
         eda_result = carregar_eda_do_ultimo_dataset(
             upload_folder=current_app.config["UPLOAD_FOLDER"],
             preferred_path=session.get("last_uploaded_file"),
+            demo_dataset_path=current_app.config["DEMO_DATASET_PATH"],
+            dataset_source=dataset_source,
+            use_demo_by_default=bool(current_app.config["USE_DEMO_DATASET_BY_DEFAULT"]),
             example_limit=2,
             top_detailed_limit=8,
         )
@@ -86,18 +114,26 @@ def eda():
         )
         return redirect(url_for("pipeline.upload"))
 
-    return render_template("eda.html", eda_result=eda_result)
+    return render_template(
+        "eda.html",
+        eda_result=eda_result,
+        **montar_contexto_fonte_dataset(dataset_source),
+    )
 
 
 @pipeline_bp.route("/baseline", methods=["GET"])
 def baseline():
     """Treina e exibe o baseline hierarquico para o dataset ativo."""
+    dataset_source = obter_fonte_dataset_ativa()
 
     try:
         baseline_result = executar_treinamento_baseline(
             upload_folder=current_app.config["UPLOAD_FOLDER"],
             artifacts_folder=current_app.config["ARTIFACTS_FOLDER"],
             preferred_path=session.get("last_uploaded_file"),
+            demo_dataset_path=current_app.config["DEMO_DATASET_PATH"],
+            dataset_source=dataset_source,
+            use_demo_by_default=bool(current_app.config["USE_DEMO_DATASET_BY_DEFAULT"]),
         )
     except BaselineError as exc:
         flash(str(exc), "warning")
@@ -107,7 +143,11 @@ def baseline():
         flash("Nao foi possivel treinar o baseline com o dataset atual.", "danger")
         return redirect(url_for("pipeline.upload"))
 
-    return render_template("baseline.html", baseline_result=baseline_result)
+    return render_template(
+        "baseline.html",
+        baseline_result=baseline_result,
+        **montar_contexto_fonte_dataset(dataset_source),
+    )
 
 
 @pipeline_bp.route("/genai-demo", methods=["GET", "POST"])
@@ -154,6 +194,7 @@ def genai_demo():
 @pipeline_bp.route("/predict", methods=["GET", "POST"])
 def predict():
     """Executa a inferencia ponta a ponta com baseline e camada GenAI complementar."""
+    dataset_source = obter_fonte_dataset_ativa()
     channel_options = obter_canais_origem_padrao()
     routing_legend = obter_legenda_fluxo_operacional()
     text_input = request.form.get("text_input", "")
@@ -190,6 +231,7 @@ def predict():
         prediction_result=prediction_result,
         artifacts_ready=artifacts_ready,
         routing_legend=routing_legend,
+        **montar_contexto_fonte_dataset(dataset_source),
     )
 
 

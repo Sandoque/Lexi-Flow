@@ -29,7 +29,7 @@ from app.services.ingest_service import REQUIRED_COLUMNS
 from app.services.nlp_config import NLPConfig, obter_configuracao_nlp_padrao
 from app.services.preprocessing_service import prepare_texts
 from app.utils.chart_builders import gerar_matriz_confusao_base64
-from app.utils.dataset_locator import localizar_dataset_disponivel
+from app.utils.dataset_locator import DatasetSelection, localizar_dataset_disponivel
 from app.utils.file_handlers import ensure_directory
 from app.utils.text_statistics import resumir_texto
 
@@ -58,12 +58,22 @@ def executar_treinamento_baseline(
     upload_folder: str | Path,
     artifacts_folder: str | Path,
     preferred_path: str | None = None,
+    demo_dataset_path: str | Path | None = None,
+    dataset_source: str | None = None,
+    use_demo_by_default: bool = False,
     test_size: float = DEFAULT_TEST_SIZE,
     random_state: int = DEFAULT_RANDOM_STATE,
     nlp_config: NLPConfig | None = None,
 ) -> dict:
     """Executa o baseline hierarquico completo em dois niveis."""
-    dataset_path = localizar_arquivo_baseline(upload_folder, preferred_path)
+    dataset_selection = localizar_arquivo_baseline(
+        upload_folder=upload_folder,
+        preferred_path=preferred_path,
+        demo_dataset_path=demo_dataset_path,
+        dataset_source=dataset_source,
+        use_demo_by_default=use_demo_by_default,
+    )
+    dataset_path = dataset_selection.path
     dataframe = carregar_dataset_baseline(dataset_path)
     modeling_df = preparar_dados_modelagem(dataframe, nlp_config=nlp_config)
     split_data = preparar_treino_teste(
@@ -130,6 +140,9 @@ def executar_treinamento_baseline(
         metadata={
             "trained_at": datetime.now(UTC).isoformat(),
             "dataset_path": str(dataset_path),
+            "dataset_source": dataset_selection.source,
+            "dataset_source_label": dataset_selection.source_label,
+            "dataset_is_demo": dataset_selection.is_demo,
             "test_size": test_size,
             "random_state": random_state,
             "split": {
@@ -150,6 +163,9 @@ def executar_treinamento_baseline(
         "dataset": {
             "filename": dataset_path.name,
             "path": str(dataset_path),
+            "source": dataset_selection.source,
+            "source_label": dataset_selection.source_label,
+            "is_demo": dataset_selection.is_demo,
             "row_count": int(modeling_df.shape[0]),
         },
         "split": {
@@ -307,12 +323,26 @@ def predict_detailed(
     return predictions
 
 
-def localizar_arquivo_baseline(upload_folder: str | Path, preferred_path: str | None = None) -> Path:
-    """Resolve o arquivo que sera usado no treino baseline."""
+def localizar_arquivo_baseline(
+    upload_folder: str | Path,
+    preferred_path: str | None = None,
+    demo_dataset_path: str | Path | None = None,
+    dataset_source: str | None = None,
+    use_demo_by_default: bool = False,
+) -> DatasetSelection:
+    """Resolve o dataset que sera usado no treino baseline."""
     try:
-        return localizar_dataset_disponivel(upload_folder, preferred_path)
+        return localizar_dataset_disponivel(
+            upload_folder=upload_folder,
+            preferred_path=preferred_path,
+            demo_dataset_path=demo_dataset_path,
+            dataset_source=dataset_source,
+            use_demo_by_default=use_demo_by_default,
+        )
     except FileNotFoundError as exc:
-        raise BaselineError("Nenhum CSV disponivel para treinamento. Faca um upload antes do baseline.") from exc
+        raise BaselineError(
+            "Nenhum dataset disponivel para treinamento. Faca um upload ou configure o dataset demo antes do baseline."
+        ) from exc
 
 
 def carregar_dataset_baseline(dataset_path: str | Path) -> pd.DataFrame:

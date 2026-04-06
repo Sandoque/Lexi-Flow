@@ -11,6 +11,24 @@
     <p>Envie uma base textual em formato CSV para iniciar o fluxo de validacao, exploracao e classificacao.</p>
 </section>
 
+<section class="panel dataset-mode-panel">
+    <div>
+        <p class="eyebrow">Modo de dados</p>
+        <h2>Fonte ativa: {{ dataset_source_label }}</h2>
+        <p>
+            {% if using_demo_dataset %}
+                O sistema esta apontando para o dataset demo configurado em <code>{{ demo_dataset_path }}</code>.
+            {% else %}
+                O sistema esta apontando para o ultimo upload valido salvo em <code>data/raw/</code>.
+            {% endif %}
+        </p>
+    </div>
+    <div class="action-row">
+        <a class="button {% if not using_demo_dataset %}button-primary{% else %}button-secondary{% endif %}" href="{{ url_for('pipeline.upload', dataset_source='upload') }}">Usar ultimo upload</a>
+        <a class="button {% if using_demo_dataset %}button-primary{% else %}button-secondary{% endif %}" href="{{ url_for('pipeline.upload', dataset_source='demo') }}">Usar dataset demo</a>
+    </div>
+</section>
+
 <section class="panel panel-upload">
     <div>
         <h2>Entrada inicial do pipeline</h2>
@@ -29,6 +47,7 @@
     </div>
 
     <form method="post" enctype="multipart/form-data" class="upload-form">
+        <input type="hidden" name="dataset_source" value="{{ dataset_source }}">
         <label for="dataset">Arquivo CSV</label>
         <input id="dataset" name="dataset" type="file" accept=".csv">
         <button type="submit" class="button button-primary">Enviar arquivo</button>
@@ -44,8 +63,8 @@
         <div class="section-heading__actions">
             <p>Os dados abaixo refletem a leitura inicial do CSV salvo em <code>data/raw/</code>.</p>
             <div class="action-row">
-                <a class="button button-secondary" href="{{ url_for('pipeline.eda') }}">Abrir analise exploratoria</a>
-                <a class="button button-secondary" href="{{ url_for('pipeline.baseline') }}">Treinar baseline</a>
+                <a class="button button-secondary" href="{{ url_for('pipeline.eda', dataset_source=dataset_source) }}">Abrir analise exploratoria</a>
+                <a class="button button-secondary" href="{{ url_for('pipeline.baseline', dataset_source=dataset_source) }}">Treinar baseline</a>
             </div>
         </div>
     </section>
