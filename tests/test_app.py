@@ -358,6 +358,7 @@ def test_predict_route_runs_end_to_end_in_mock_mode(tmp_path: Path):
     assert b"Predicao estatistica" in response.data
     assert b"Classe detalhada sugerida" in response.data
     assert b"Fluxo Operacional Recomendado" in response.data
+    assert b"Casos similares usados como apoio" in response.data
     assert b"Financeiro" in response.data
     assert b"Boleto" in response.data
     assert b"Provider usado" in response.data

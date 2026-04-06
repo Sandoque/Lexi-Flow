@@ -214,6 +214,7 @@
                 <li><span>Prioridade sugerida</span><strong>{{ prediction_result.genai.priority }}</strong></li>
                 <li><span>Caso ambiguo</span><strong>{% if prediction_result.genai.ambiguous_case %}Sim{% else %}Nao{% endif %}</strong></li>
                 <li><span>Provider usado</span><strong>{{ prediction_result.genai.provider }}</strong></li>
+                <li><span>Casos similares como apoio</span><strong>{% if prediction_result.genai.similar_examples_used %}Sim{% else %}Nao{% endif %}</strong></li>
             </ul>
 
             {% if prediction_result.genai.fallback_reason %}
@@ -254,16 +255,31 @@
         </article>
     </section>
 
-    {% if prediction_result.genai.prompt %}
+    {% if prediction_result.genai.similar_examples_used %}
         <section class="panel">
             <div class="table-header">
                 <div>
-                    <p class="eyebrow">Auditoria leve</p>
-                    <h2>Prompt estruturado enviado para a GenAI</h2>
+                    <p class="eyebrow">Few-shot contextual</p>
+                    <h2>Casos similares usados como apoio</h2>
                 </div>
-                <p>Base pronta para evolucao com few-shot contextual e recuperacao de exemplos similares.</p>
+                <p>
+                    O LexiFlow recuperou exemplos historicos parecidos com o texto atual para enriquecer o contexto do LLM.
+                </p>
             </div>
-            <pre class="report-block">{{ prediction_result.genai.prompt }}</pre>
+            <ul class="distribution-list">
+                <li><span>Estrategia</span><strong>{{ prediction_result.genai.similar_examples_strategy }}</strong></li>
+                <li><span>Escopo de busca</span><strong>{{ prediction_result.genai.similar_examples_scope }}</strong></li>
+                <li><span>Total de exemplos</span><strong>{{ prediction_result.genai.similar_examples_count }}</strong></li>
+            </ul>
+            <div class="examples-grid">
+                {% for example in prediction_result.genai.similar_examples_support %}
+                    <article class="example-group">
+                        <span>Similaridade {{ example.similarity_percent }}</span>
+                        <strong>{{ example.macro_class }} -> {{ example.detailed_class }}</strong>
+                        <p>{{ example.text }}</p>
+                    </article>
+                {% endfor %}
+            </div>
         </section>
     {% endif %}
 {% endif %}

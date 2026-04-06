@@ -18,11 +18,14 @@ from app.services.genai_refiner import (
     GenAIRefiner,
     GenAIRefinerError,
     GenAISettings,
-    get_demo_few_shot_examples,
 )
 from app.services.nlp_config import NLPConfig, obter_configuracao_nlp_padrao
 from app.services.preprocessing_service import prepare_texts
 from app.services.routing_service import classificar_nivel_confianca, definir_fluxo_operacional
+from app.services.similar_examples_service import (
+    SimilarExamplesError,
+    recuperar_exemplos_similares,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -92,6 +95,8 @@ def executar_fluxo_predicao(
         macro_prediction=macro_prediction["label"],
         valid_detailed_classes=valid_detailed_classes,
         baseline_detail=baseline_detail,
+        dataset_path=str(artifacts["metadata"].get("dataset_path", "")),
+        nlp_config=nlp_config,
         genai_settings=genai_settings,
     )
     operational_routing = definir_fluxo_operacional(
@@ -239,18 +244,26 @@ def executar_refinamento_genai(
     macro_prediction: str,
     valid_detailed_classes: list[str],
     baseline_detail: str,
+    dataset_path: str,
+    nlp_config: NLPConfig,
     genai_settings: GenAISettings,
 ) -> dict[str, Any]:
     """Aciona a camada GenAI sem impedir o uso do baseline quando houver degradacao."""
     refiner = GenAIRefiner(genai_settings)
     prompt_text = montar_texto_para_refinamento(text=text, channel_origin=channel_origin)
+    similar_context = recuperar_contexto_similar(
+        text=text,
+        macro_prediction=macro_prediction,
+        dataset_path=dataset_path,
+        nlp_config=nlp_config,
+    )
 
     try:
         response = refiner.refine(
             text=prompt_text,
             predicted_macro=macro_prediction,
             valid_detailed_classes=valid_detailed_classes,
-            few_shot_examples=get_demo_few_shot_examples(),
+            few_shot_examples=similar_context["few_shot_examples"],
         )
         result = response["result"]
         return {
@@ -266,6 +279,11 @@ def executar_refinamento_genai(
             "priority": str(result["priority"]),
             "ambiguous_case": bool(result["ambiguous_case"]),
             "status": "ok",
+            "similar_examples_used": bool(similar_context["used_count"]),
+            "similar_examples_count": int(similar_context["used_count"]),
+            "similar_examples_strategy": str(similar_context["strategy"]),
+            "similar_examples_scope": str(similar_context["scope"]),
+            "similar_examples_support": similar_context["support_examples"],
         }
     except GenAIRefinerError as exc:
         logger.warning("GenAI indisponivel durante a inferencia real: %s", exc)
@@ -285,6 +303,11 @@ def executar_refinamento_genai(
             "priority": "nao definida",
             "ambiguous_case": False,
             "status": "baseline_only",
+            "similar_examples_used": bool(similar_context["used_count"]),
+            "similar_examples_count": int(similar_context["used_count"]),
+            "similar_examples_strategy": str(similar_context["strategy"]),
+            "similar_examples_scope": str(similar_context["scope"]),
+            "similar_examples_support": similar_context["support_examples"],
         }
 
 
@@ -293,6 +316,42 @@ def montar_texto_para_refinamento(text: str, channel_origin: str) -> str:
     if not channel_origin:
         return text
     return f"Canal de origem: {channel_origin}\nTexto do caso: {text}"
+
+
+def recuperar_contexto_similar(
+    text: str,
+    macro_prediction: str,
+    dataset_path: str,
+    nlp_config: NLPConfig,
+) -> dict[str, Any]:
+    """Recupera few-shot contextual do historico sem depender de infraestrutura externa."""
+    if not dataset_path:
+        return {
+            "few_shot_examples": [],
+            "support_examples": [],
+            "strategy": "tfidf_cosine",
+            "scope": "macro",
+            "used_count": 0,
+        }
+
+    try:
+        return recuperar_exemplos_similares(
+            text=text,
+            predicted_macro=macro_prediction,
+            dataset_path=dataset_path,
+            nlp_config=nlp_config,
+            top_k=3,
+            restrict_to_macro=True,
+        )
+    except SimilarExamplesError as exc:
+        logger.warning("Nao foi possivel recuperar casos similares para a GenAI: %s", exc)
+        return {
+            "few_shot_examples": [],
+            "support_examples": [],
+            "strategy": "tfidf_cosine",
+            "scope": "macro",
+            "used_count": 0,
+        }
 
 
 def listar_etapas_preprocessamento(config: NLPConfig) -> list[str]:

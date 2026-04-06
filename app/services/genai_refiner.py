@@ -86,6 +86,7 @@ class GenAIRefiner:
             "model": self.settings.model,
             "mode": self.provider.active_mode,
             "fallback_reason": self.provider.fallback_reason,
+            "few_shot_count": len(few_shot_examples or []),
             "prompt": prompt,
             "result": parsed,
         }
@@ -334,6 +335,7 @@ def build_structured_prompt(
             "Mantenha a justificativa curta e operacional.",
             "Use a prioridade apenas se o texto indicar urgencia, criticidade ou impacto operacional.",
             "Marque ambiguous_case como true quando houver sinais conflitantes ou mais de uma classe plausivel.",
+            "Quando houver exemplos similares, use-os como contexto comparativo e nao como regra fixa.",
         ],
         "predicted_macro": predicted_macro,
         "valid_detailed_classes": valid_detailed_classes,

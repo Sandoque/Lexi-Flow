@@ -146,5 +146,6 @@ def test_refine_falls_back_to_mock_on_timeout(monkeypatch: pytest.MonkeyPatch):
     assert result["requested_provider"] == "groq"
     assert result["provider"] == "mock"
     assert result["mode"] == "mock"
+    assert result["few_shot_count"] == 1
     assert result["fallback_reason"] == "timeout na chamada do provider"
     assert result["result"]["detailed_class"] in {"Boleto", "Cobranca", "Pagamento"}
