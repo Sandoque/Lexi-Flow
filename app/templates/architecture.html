@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block title %}{{ app_name }} | Arquitetura{% endblock %}
+
+{% block content %}
+<section class="hero-panel hero-panel--compact">
+    <article class="hero-panel__content">
+        <p class="eyebrow">Arquitetura do case</p>
+        <h1>Visao de produto da solucao</h1>
+        <p class="hero-panel__description">
+            O LexiFlow combina baseline supervisionado e IA generativa com critério, preservando governança,
+            explicabilidade e orientação operacional ao longo de todo o fluxo.
+        </p>
+        <div class="hero-panel__actions">
+            <a class="button button-primary" href="{{ url_for('pipeline.predict') }}">Ver inferencia real</a>
+            <a class="button button-secondary" href="{{ url_for('pipeline.baseline') }}">Abrir baseline</a>
+        </div>
+    </article>
+
+    <aside class="hero-panel__highlight">
+        <p class="highlight-label">Mensagem central</p>
+        <strong>Baseline robusto com GenAI complementar</strong>
+        <span>
+            A arquitetura foi desenhada para equilibrar performance supervisionada, refinamento semântico
+            e decisão operacional assistida sem depender exclusivamente de LLM.
+        </span>
+    </aside>
+</section>
+
+<section class="section-heading">
+    <div>
+        <p class="eyebrow">Diagrama visual</p>
+        <h2>Camadas conectadas de ponta a ponta</h2>
+    </div>
+    <p>
+        Cada etapa tem papel claro no produto: reduzir risco, ampliar entendimento do corpus e sustentar
+        uma experiência de classificação que possa evoluir com feedback humano.
+    </p>
+</section>
+
+<section class="architecture-flow">
+    {% for layer in architecture_layers %}
+        <article class="architecture-node">
+            <span class="architecture-node__order">{{ layer.order }}</span>
+            <h3>{{ layer.title }}</h3>
+            <p>{{ layer.description }}</p>
+        </article>
+        {% if not loop.last %}
+            <div class="architecture-arrow" aria-hidden="true">→</div>
+        {% endif %}
+    {% endfor %}
+</section>
+
+<section class="panel">
+    <div class="table-header">
+        <div>
+            <p class="eyebrow">Leitura executiva</p>
+            <h2>Como a solução se posiciona</h2>
+        </div>
+        <p>O desenho técnico traduz uma narrativa de produto, não apenas uma sequência de modelos.</p>
+    </div>
+    <div class="card-grid architecture-grid">
+        {% for layer in architecture_layers %}
+            <article class="card card-layer">
+                <span class="card-layer__order">{{ layer.order }}</span>
+                <h3>{{ layer.title }}</h3>
+                <p>{{ layer.description }}</p>
+            </article>
+        {% endfor %}
+    </div>
+</section>
+
+<section class="panel">
+    <div class="table-header">
+        <div>
+            <p class="eyebrow">Roadmap de Evolucao</p>
+            <h2>Proximas capacidades do produto</h2>
+        </div>
+        <p>O roadmap reforça que a arquitetura atual já foi preparada para crescer com critério.</p>
+    </div>
+    <div class="roadmap-grid">
+        {% for item in roadmap_items %}
+            <article class="roadmap-item">
+                <span class="roadmap-item__marker"></span>
+                <strong>{{ item }}</strong>
+            </article>
+        {% endfor %}
+    </div>
+</section>
+
+<section class="info-strip">
+    <div>
+        <p class="eyebrow">Sintese do case</p>
+        <h2>Do dado bruto à decisão operacional</h2>
+    </div>
+    <p>
+        A narrativa da solução fica clara: ingestão controlada, entendimento do corpus, baseline confiável,
+        refinamento generativo e uma camada final orientada à operação real.
+    </p>
+</section>
+{% endblock %}

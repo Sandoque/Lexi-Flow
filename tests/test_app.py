@@ -26,6 +26,19 @@ def test_home_route_returns_success():
     assert b"LexiFlow" in response.data
 
 
+def test_architecture_route_returns_case_presentation():
+    """Garante que a pagina de arquitetura apresenta as camadas do case."""
+    app = create_app("testing")
+    client = app.test_client()
+
+    response = client.get("/arquitetura")
+
+    assert response.status_code == 200
+    assert b"Visao de produto da solucao" in response.data
+    assert b"Roadmap de Evolucao" in response.data
+    assert b"Operacao assistida" in response.data
+
+
 def test_health_route_returns_ok_payload():
     """Garante que a rota de healthcheck retorna status esperado."""
     app = create_app("testing")
