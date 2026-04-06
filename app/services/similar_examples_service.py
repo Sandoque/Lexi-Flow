@@ -85,9 +85,10 @@ def recuperar_exemplos_similares(
         strip_accents="unicode",
         sublinear_tf=True,
     )
-    corpus = list(working_df["texto_processado"]) + [query_text]
-    matrix = vectorizer.fit_transform(corpus)
-    similarities = cosine_similarity(matrix[-1], matrix[:-1]).flatten()
+    history_texts = list(working_df["texto_processado"])
+    history_matrix = vectorizer.fit_transform(history_texts)
+    query_matrix = vectorizer.transform([query_text])
+    similarities = cosine_similarity(query_matrix, history_matrix).flatten()
 
     ranked_indices = sorted(
         range(len(similarities)),
