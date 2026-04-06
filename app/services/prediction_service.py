@@ -22,6 +22,7 @@ from app.services.genai_refiner import (
 )
 from app.services.nlp_config import NLPConfig, obter_configuracao_nlp_padrao
 from app.services.preprocessing_service import prepare_texts
+from app.services.routing_service import classificar_nivel_confianca, definir_fluxo_operacional
 
 logger = logging.getLogger(__name__)
 
@@ -93,11 +94,12 @@ def executar_fluxo_predicao(
         baseline_detail=baseline_detail,
         genai_settings=genai_settings,
     )
-    recommendation = montar_recomendacao_operacional(
+    operational_routing = definir_fluxo_operacional(
         macro_confidence=macro_prediction["confidence"],
         priority=genai_result["priority"],
         ambiguous_case=genai_result["ambiguous_case"],
         provider=genai_result["provider"],
+        genai_status=genai_result["status"],
     )
 
     return {
@@ -116,7 +118,13 @@ def executar_fluxo_predicao(
             "preprocessing_steps": listar_etapas_preprocessamento(nlp_config),
         },
         "genai": genai_result,
-        "recommendation": recommendation,
+        "recommendation": {
+            "action": operational_routing["action"],
+            "rationale": operational_routing["reason"],
+            "requires_review": operational_routing["review_required"],
+            "confidence_band": operational_routing["confidence_level"],
+        },
+        "routing": operational_routing,
         "artifacts": {
             "macro_pipeline_ready": True,
             "detailed_models_ready": True,
@@ -168,7 +176,7 @@ def prever_macro_com_confianca(macro_pipeline: Pipeline, processed_text: str) ->
         "label": macro_label,
         "confidence": confidence,
         "confidence_percent": f"{confidence * 100:.1f}%",
-        "confidence_band": classificar_faixa_confianca(confidence),
+        "confidence_band": classificar_nivel_confianca(confidence),
     }
 
 
@@ -282,54 +290,6 @@ def montar_texto_para_refinamento(text: str, channel_origin: str) -> str:
     if not channel_origin:
         return text
     return f"Canal de origem: {channel_origin}\nTexto do caso: {text}"
-
-
-def montar_recomendacao_operacional(
-    macro_confidence: float,
-    priority: str,
-    ambiguous_case: bool,
-    provider: str,
-) -> dict[str, Any]:
-    """Traduz score e ambiguidade em uma recomendacao operacional objetiva."""
-    confidence_band = classificar_faixa_confianca(macro_confidence)
-    high_priority = priority.strip().lower() == "alta"
-
-    if provider == "indisponivel":
-        action = "Encaminhar para revisao assistida antes de registrar a classe detalhada."
-        rationale = "A macro foi prevista, mas o refinamento generativo nao ficou disponivel nesta execucao."
-        requires_review = True
-    elif ambiguous_case or confidence_band == "baixa":
-        action = "Priorizar triagem humana e validar a classificacao antes da operacao."
-        rationale = "Baixa confianca ou ambiguidade indicam risco maior de erro semantico."
-        requires_review = True
-    elif high_priority:
-        action = "Acionar fila prioritaria e registrar a classificacao com revisao posterior."
-        rationale = "O texto sinaliza urgencia e a confianca macro esta em faixa utilizavel."
-        requires_review = False
-    elif confidence_band == "media":
-        action = "Encaminhar para revisao rapida com apoio da sugestao GenAI."
-        rationale = "A classificacao esta consistente, mas ainda merece validacao operacional leve."
-        requires_review = True
-    else:
-        action = "Registrar a classificacao sugerida e seguir o fluxo padrao da operacao."
-        rationale = "Confianca alta e ausencia de ambiguidade permitem uma decisao mais direta."
-        requires_review = False
-
-    return {
-        "action": action,
-        "rationale": rationale,
-        "requires_review": requires_review,
-        "confidence_band": confidence_band,
-    }
-
-
-def classificar_faixa_confianca(confidence: float) -> str:
-    """Classifica o score em uma faixa simples para a interface."""
-    if confidence >= 0.75:
-        return "alta"
-    if confidence >= 0.45:
-        return "media"
-    return "baixa"
 
 
 def listar_etapas_preprocessamento(config: NLPConfig) -> list[str]:

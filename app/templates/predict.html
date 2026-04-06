@@ -82,6 +82,24 @@
     </aside>
 </section>
 
+<section class="panel">
+    <div class="table-header">
+        <div>
+            <p class="eyebrow">Legenda operacional</p>
+            <h2>Racional do roteamento</h2>
+        </div>
+        <p>O nivel de confianca orienta o grau de automacao recomendado para a operacao.</p>
+    </div>
+    <div class="routing-legend">
+        {% for item in routing_legend %}
+            <article class="routing-legend__item">
+                <strong>{{ item.level }}</strong>
+                <p>{{ item.description }}</p>
+            </article>
+        {% endfor %}
+    </div>
+</section>
+
 {% if prediction_result %}
     <section class="metrics-grid">
         <article class="metric-card">
@@ -174,17 +192,30 @@
         <article class="panel">
             <div class="table-header">
                 <div>
-                    <p class="eyebrow">Acao recomendada</p>
-                    <h2>Leitura operacional</h2>
+                    <p class="eyebrow">Operacao assistida</p>
+                    <h2>Fluxo Operacional Recomendado</h2>
                 </div>
-                <p>A recomendacao considera confianca macro, ambiguidade e prioridade.</p>
+                <p>O roteamento combina confianca do baseline, ambiguidade e suporte da GenAI.</p>
+            </div>
+            <div class="routing-card routing-card--{{ prediction_result.routing.badge_tone }}">
+                <span class="routing-card__label">Decisao</span>
+                <strong>{{ prediction_result.routing.decision }}</strong>
+                <p>{{ prediction_result.routing.reason }}</p>
             </div>
             <ul class="distribution-list">
-                <li><span>Acao</span><strong>{{ prediction_result.recommendation.action }}</strong></li>
-                <li><span>Racional</span><strong>{{ prediction_result.recommendation.rationale }}</strong></li>
-                <li><span>Requer revisao humana</span><strong>{% if prediction_result.recommendation.requires_review %}Sim{% else %}Nao{% endif %}</strong></li>
-                <li><span>Faixa de confianca</span><strong>{{ prediction_result.recommendation.confidence_band }}</strong></li>
+                <li><span>Nivel de confianca</span><strong>{{ prediction_result.routing.confidence_level }}</strong></li>
+                <li><span>Motivo do roteamento</span><strong>{{ prediction_result.routing.reason }}</strong></li>
+                <li><span>Acao sugerida</span><strong>{{ prediction_result.routing.action }}</strong></li>
+                <li><span>Observacao para o operador</span><strong>{{ prediction_result.routing.operator_note }}</strong></li>
+                <li><span>Fila recomendada</span><strong>{{ prediction_result.routing.queue }}</strong></li>
             </ul>
+            <div class="predict-alert predict-alert--soft">
+                <strong>Preparado para feedback humano</strong>
+                <p>
+                    Esta estrutura ja separa a decisao operacional do restante da inferencia e pode receber,
+                    em seguida, registro de aceite, correcao ou override do operador.
+                </p>
+            </div>
         </article>
     </section>
 

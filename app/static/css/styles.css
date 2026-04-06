@@ -627,6 +627,76 @@ input[type="file"] {
     margin: 0;
 }
 
+.predict-alert--soft {
+    border-color: rgba(21, 32, 51, 0.12);
+    background: rgba(21, 32, 51, 0.04);
+}
+
+.routing-legend {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.routing-legend__item {
+    padding: 1.1rem;
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    background: var(--surface-strong);
+}
+
+.routing-legend__item strong {
+    display: block;
+    margin-bottom: 0.45rem;
+    color: var(--accent-strong);
+}
+
+.routing-legend__item p {
+    margin: 0;
+}
+
+.routing-card {
+    margin-bottom: 1rem;
+    padding: 1.15rem 1.2rem;
+    border-radius: 18px;
+    border: 1px solid var(--border);
+    background: var(--surface-strong);
+}
+
+.routing-card__label {
+    display: block;
+    margin-bottom: 0.4rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+
+.routing-card strong {
+    display: block;
+    font-size: 1.4rem;
+    margin-bottom: 0.55rem;
+}
+
+.routing-card p {
+    margin: 0;
+}
+
+.routing-card--success {
+    border-color: rgba(29, 107, 79, 0.2);
+    background: rgba(29, 107, 79, 0.08);
+}
+
+.routing-card--warning {
+    border-color: rgba(138, 107, 20, 0.2);
+    background: rgba(138, 107, 20, 0.08);
+}
+
+.routing-card--danger {
+    border-color: rgba(141, 45, 53, 0.2);
+    background: rgba(141, 45, 53, 0.08);
+}
+
 .text-extremes {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -731,6 +801,7 @@ code {
     .genai-layout,
     .prediction-layout,
     .predict-summary-grid,
+    .routing-legend,
     .hierarchy-flow,
     .section-heading,
     .info-strip,

@@ -25,6 +25,7 @@ from app.services.prediction_service import (
     executar_fluxo_predicao,
     obter_canais_origem_padrao,
 )
+from app.services.routing_service import obter_legenda_fluxo_operacional
 
 pipeline_bp = Blueprint("pipeline", __name__)
 
@@ -154,6 +155,7 @@ def genai_demo():
 def predict():
     """Executa a inferencia ponta a ponta com baseline e camada GenAI complementar."""
     channel_options = obter_canais_origem_padrao()
+    routing_legend = obter_legenda_fluxo_operacional()
     text_input = request.form.get("text_input", "")
     selected_channel = request.form.get("channel_origin", "")
     prediction_result = None
@@ -187,6 +189,7 @@ def predict():
         selected_channel=selected_channel,
         prediction_result=prediction_result,
         artifacts_ready=artifacts_ready,
+        routing_legend=routing_legend,
     )
 
 
