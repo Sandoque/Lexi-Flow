@@ -68,12 +68,14 @@ def upload():
                 allowed_extensions=current_app.config["ALLOWED_EXTENSIONS"],
             )
             session["last_uploaded_file"] = ingest_result["saved_path"]
+            session["dataset_source"] = "upload"
+            dataset_source = "upload"
             flash(
-                "Arquivo validado e salvo com sucesso em data/raw.",
+                "Arquivo validado e salvo com sucesso em data/raw. Ele agora e a fonte ativa da sessao.",
                 "success",
             )
         except IngestaoError as exc:
-            flash(str(exc), "danger")
+            flash(str(exc), "warning")
         except Exception:
             current_app.logger.exception("Erro inesperado durante a ingestao do dataset.")
             flash(
@@ -164,7 +166,8 @@ def genai_demo():
 
     if request.method == "POST":
         try:
-            refiner = GenAIRefiner(get_genai_settings_from_config(current_app.config))
+            genai_settings = get_genai_settings_from_config(current_app.config)
+            refiner = GenAIRefiner(genai_settings)
             genai_result = refiner.refine(
                 text=text_input,
                 predicted_macro=selected_macro,
@@ -172,7 +175,7 @@ def genai_demo():
                 few_shot_examples=get_demo_few_shot_examples(),
             )
             flash(
-                "A camada GenAI retornou uma sugestao estruturada para complementar o baseline.",
+                f"A camada GenAI retornou uma sugestao estruturada usando provider {genai_result['provider']}.",
                 "success",
             )
         except GenAIRefinerError as exc:
@@ -211,7 +214,19 @@ def predict():
                 genai_settings=get_genai_settings_from_config(current_app.config),
             )
             if prediction_result["genai"]["status"] == "ok":
-                flash("Inferencia concluida com baseline e camada GenAI complementar.", "success")
+                if prediction_result["genai"]["similar_examples_used"]:
+                    flash(
+                        (
+                            "Inferencia concluida com baseline, GenAI "
+                            f"via {prediction_result['genai']['provider']} e apoio de casos similares."
+                        ),
+                        "success",
+                    )
+                else:
+                    flash(
+                        f"Inferencia concluida com baseline e GenAI via {prediction_result['genai']['provider']}.",
+                        "success",
+                    )
             else:
                 flash(
                     "Inferencia concluida com baseline. A camada GenAI ficou indisponivel nesta execucao.",

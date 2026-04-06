@@ -39,6 +39,14 @@
         <p>
             Cole um texto, escolha a macroclasse prevista e dispare o refinamento. O modo mock funciona sem custo de API.
         </p>
+        <div class="status-badges">
+            <span class="state-pill {% if configured_genai_provider == 'mock' %}state-pill--warning{% else %}state-pill--info{% endif %}">
+                Provider configurado: {{ configured_genai_provider_label }}
+            </span>
+            <span class="state-pill {% if configured_genai_mock_mode %}state-pill--warning{% else %}state-pill--success{% endif %}">
+                {% if configured_genai_mock_mode %}Modo mock{% else %}Modo API{% endif %}
+            </span>
+        </div>
 
         <form method="post" class="upload-form">
             <label for="macro_class">Macroclasse prevista</label>
@@ -120,6 +128,12 @@
                     <h2>Sugestao do LLM</h2>
                 </div>
                 <p>Saida pronta para apoio operacional e revisao humana.</p>
+            </div>
+            <div class="status-badges">
+                <span class="state-pill {% if genai_result.provider == 'groq' %}state-pill--success{% elif genai_result.provider == 'mock' %}state-pill--warning{% else %}state-pill--danger{% endif %}">
+                    Provider efetivo: {{ genai_result.provider }}
+                </span>
+                <span class="state-pill state-pill--info">Provider solicitado: {{ genai_result.requested_provider }}</span>
             </div>
             <ul class="distribution-list">
                 <li><span>Classe detalhada sugerida</span><strong>{{ genai_result.result.detailed_class }}</strong></li>

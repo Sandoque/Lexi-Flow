@@ -37,9 +37,13 @@ def register_context_processors(app: Flask) -> None:
 
     @app.context_processor
     def inject_app_metadata():
+        configured_provider = str(app.config["GENAI_PROVIDER"]).strip().lower()
         return {
             "app_name": app.config["APP_NAME"],
             "app_subtitle": app.config["APP_SUBTITLE"],
+            "configured_genai_provider": configured_provider,
+            "configured_genai_provider_label": configured_provider.upper() if configured_provider != "mock" else "MOCK",
+            "configured_genai_mock_mode": bool(app.config["GENAI_MOCK_MODE"]),
         }
 
 

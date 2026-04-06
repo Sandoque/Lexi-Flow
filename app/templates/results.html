@@ -3,9 +3,12 @@
 {% block title %}LexiFlow | Resultados{% endblock %}
 
 {% block content %}
-<section class="panel">
-    <h2>Visao inicial dos resultados</h2>
-    <p>Os cards abaixo mostram os modulos previstos para o pipeline de NLP e IA generativa.</p>
+<section class="section-heading">
+    <div>
+        <p class="eyebrow">Panorama da plataforma</p>
+        <h1>Resumo executivo do fluxo</h1>
+    </div>
+    <p>Visao resumida das camadas entregues no LexiFlow para apoiar a narrativa do case em uma unica tela.</p>
 </section>
 
 <section class="card-grid">
@@ -16,5 +19,16 @@
             <p>{{ item.details }}</p>
         </article>
     {% endfor %}
+</section>
+
+<section class="info-strip">
+    <div>
+        <p class="eyebrow">Apresentacao</p>
+        <h2>Do panorama para a demonstracao pratica</h2>
+    </div>
+    <div class="action-row">
+        <a class="button button-primary" href="{{ url_for('main.architecture') }}">Abrir arquitetura</a>
+        <a class="button button-secondary" href="{{ url_for('pipeline.predict') }}">Abrir inferencia real</a>
+    </div>
 </section>
 {% endblock %}

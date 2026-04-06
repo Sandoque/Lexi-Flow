@@ -123,12 +123,6 @@ def executar_fluxo_predicao(
             "preprocessing_steps": listar_etapas_preprocessamento(nlp_config),
         },
         "genai": genai_result,
-        "recommendation": {
-            "action": operational_routing["action"],
-            "rationale": operational_routing["reason"],
-            "requires_review": operational_routing["review_required"],
-            "confidence_band": operational_routing["confidence_level"],
-        },
         "routing": operational_routing,
         "artifacts": {
             "macro_pipeline_ready": True,

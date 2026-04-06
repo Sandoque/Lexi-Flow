@@ -117,6 +117,80 @@ body {
     color: var(--accent);
 }
 
+.nav__link--active {
+    color: var(--accent) !important;
+}
+
+.header-status,
+.status-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-top: 0.9rem;
+}
+
+.state-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.45rem 0.75rem;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--surface-strong);
+    font-size: 0.86rem;
+    font-weight: 700;
+}
+
+.state-pill--info {
+    color: var(--accent-strong);
+    background: rgba(31, 79, 143, 0.08);
+    border-color: rgba(31, 79, 143, 0.16);
+}
+
+.state-pill--accent {
+    color: #5c3d0b;
+    background: rgba(198, 160, 72, 0.16);
+    border-color: rgba(198, 160, 72, 0.24);
+}
+
+.state-pill--success {
+    color: var(--success);
+    background: rgba(29, 107, 79, 0.08);
+    border-color: rgba(29, 107, 79, 0.16);
+}
+
+.state-pill--warning {
+    color: var(--warning);
+    background: rgba(138, 107, 20, 0.08);
+    border-color: rgba(138, 107, 20, 0.16);
+}
+
+.state-pill--danger {
+    color: var(--danger);
+    background: rgba(141, 45, 53, 0.08);
+    border-color: rgba(141, 45, 53, 0.16);
+}
+
+.app-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 1.2rem;
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(198, 160, 72, 0.24);
+    background: rgba(198, 160, 72, 0.14);
+    box-shadow: var(--shadow);
+}
+
+.app-banner strong {
+    color: #5c3d0b;
+}
+
+.app-banner p {
+    margin: 0;
+}
+
 main {
     padding: 2rem 0 1rem;
 }
@@ -883,7 +957,8 @@ code {
     .text-extremes,
     .baseline-toolbar,
     .dataset-mode-panel,
-    .examples-grid--wide {
+    .examples-grid--wide,
+    .app-banner {
         grid-template-columns: 1fr;
         display: grid;
     }

@@ -10,17 +10,17 @@
         <p class="hero-panel__subtitle">{{ app_subtitle }}</p>
         <p class="hero-panel__description">
             Aplicacao web para receber bases textuais em CSV, validar estrutura, explorar o corpus,
-            produzir uma classificacao baseline e abrir espaco para refinamento com IA generativa.
+            produzir classificacao hierarquica, refinar resultados com IA generativa e orientar a operacao com criterio.
         </p>
         <div class="hero-panel__actions">
-            <a class="button button-primary" href="{{ url_for('pipeline.upload') }}">Ir para upload do CSV</a>
-            <a class="button button-secondary" href="{{ url_for('main.health') }}">Ver healthcheck</a>
+            <a class="button button-primary" href="{{ url_for('pipeline.predict') }}">Abrir inferencia real</a>
+            <a class="button button-secondary" href="{{ url_for('main.architecture') }}">Ver arquitetura</a>
         </div>
     </div>
     <aside class="hero-panel__highlight">
         <p class="highlight-label">Estado da plataforma</p>
-        <strong>Primeira versao funcional</strong>
-        <span>Base Flask pronta para evoluir o pipeline de classificacao textual com separacao por camadas.</span>
+        <strong>Experiencia ponta a ponta pronta</strong>
+        <span>Fluxo integrado com dataset demo, baseline hierarquico, GenAI complementar e operacao assistida.</span>
     </aside>
 </section>
 
@@ -47,9 +47,12 @@
 
 <section class="info-strip">
     <div>
-        <p class="eyebrow">Proximo passo natural</p>
-        <h2>Conectar a area de upload ao pipeline de validacao</h2>
+        <p class="eyebrow">Fluxo recomendado</p>
+        <h2>Arquitetura, treino, inferencia e leitura operacional</h2>
     </div>
-    <a class="button button-primary" href="{{ url_for('pipeline.upload') }}">Abrir modulo de ingestao</a>
+    <div class="action-row">
+        <a class="button button-primary" href="{{ url_for('pipeline.baseline') }}">Treinar baseline</a>
+        <a class="button button-secondary" href="{{ url_for('pipeline.predict') }}">Testar /predict</a>
+    </div>
 </section>
 {% endblock %}

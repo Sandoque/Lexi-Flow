@@ -66,6 +66,7 @@
         <p>O texto original e preservado. O pre-processamento e aplicado antes da previsao macro.</p>
 
         <form method="post" class="upload-form">
+            <input type="hidden" name="dataset_source" value="{{ dataset_source }}">
             <label for="channel_origin">Canal de origem</label>
             <select id="channel_origin" name="channel_origin">
                 {% for option in channel_options %}
@@ -216,6 +217,15 @@
                 <li><span>Provider usado</span><strong>{{ prediction_result.genai.provider }}</strong></li>
                 <li><span>Casos similares como apoio</span><strong>{% if prediction_result.genai.similar_examples_used %}Sim{% else %}Nao{% endif %}</strong></li>
             </ul>
+            <div class="status-badges">
+                <span class="state-pill {% if prediction_result.genai.provider == 'groq' %}state-pill--success{% elif prediction_result.genai.provider == 'mock' %}state-pill--warning{% else %}state-pill--danger{% endif %}">
+                    Provider efetivo: {{ prediction_result.genai.provider }}
+                </span>
+                <span class="state-pill state-pill--info">Modo: {{ prediction_result.genai.mode }}</span>
+                {% if prediction_result.genai.similar_examples_used %}
+                    <span class="state-pill state-pill--accent">Few-shot contextual ativo</span>
+                {% endif %}
+            </div>
 
             {% if prediction_result.genai.fallback_reason %}
                 <div class="predict-alert">
