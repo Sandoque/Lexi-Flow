@@ -24,7 +24,6 @@
                     <a class="nav__link {% if request.endpoint == 'pipeline.eda' %}nav__link--active{% endif %}" href="{{ url_for('pipeline.eda', dataset_source=session.get('dataset_source')) }}">EDA</a>
                     <a class="nav__link {% if request.endpoint == 'pipeline.baseline' %}nav__link--active{% endif %}" href="{{ url_for('pipeline.baseline') }}">Baseline</a>
                     <a class="nav__link {% if request.endpoint == 'pipeline.predict' %}nav__link--active{% endif %}" href="{{ url_for('pipeline.predict') }}">Predição</a>
-                    <a class="nav__link {% if request.endpoint == 'pipeline.genai_demo' %}nav__link--active{% endif %}" href="{{ url_for('pipeline.genai_demo') }}">GenAI Demo</a>
                     <a class="nav__link {% if request.endpoint == 'main.architecture' %}nav__link--active{% endif %}" href="{{ url_for('main.architecture') }}">Arquitetura</a>
                 </nav>
                 <div class="header-status">
