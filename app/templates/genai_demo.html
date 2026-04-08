@@ -5,47 +5,27 @@
 {% block content %}
 <section class="section-heading">
     <div>
-        <p class="eyebrow">Camada de inovacao</p>
+        <p class="eyebrow">Camada complementar ao refinamento</p>
         <h1>GenAI Demo para refinamento detalhado</h1>
     </div>
-    <p>
-        Esta camada complementa o baseline hierarquico. Ela nao substitui a previsao estatistica, mas ajuda no
-        refinamento explicavel da <code>classe_detalhada</code> dentro da macroclasse ja definida.
-    </p>
-</section>
-
-<section class="panel hierarchy-flow">
-    <article class="hierarchy-step">
-        <span class="card-layer__order">1</span>
-        <h2>Baseline macro</h2>
-        <p>O fluxo principal aponta a macroclasse provavel do caso.</p>
-    </article>
-    <article class="hierarchy-step">
-        <span class="card-layer__order">2</span>
-        <h2>Filtro operacional</h2>
-        <p>Somente as classes detalhadas validas daquela macro seguem para refinamento.</p>
-    </article>
-    <article class="hierarchy-step">
-        <span class="card-layer__order">3</span>
-        <h2>Refino GenAI</h2>
-        <p>O LLM sugere uma classe detalhada, justificativa, prioridade e sinal de ambiguidade.</p>
-    </article>
+    <p>Playground controlado para mostrar o papel do provider sem competir com a tela principal de inferencia.</p>
 </section>
 
 <section class="panel genai-layout">
     <div>
-        <p class="eyebrow">Entrada da demonstracao</p>
-        <h2>Classificacao assistida</h2>
-        <p>
-            Cole um texto, escolha a macroclasse prevista e dispare o refinamento. O modo mock funciona sem custo de API.
-        </p>
-        <div class="status-badges">
-            <span class="state-pill {% if configured_genai_provider == 'mock' %}state-pill--warning{% else %}state-pill--info{% endif %}">
-                Provider configurado: {{ configured_genai_provider_label }}
-            </span>
-            <span class="state-pill {% if configured_genai_mock_mode %}state-pill--warning{% else %}state-pill--success{% endif %}">
-                {% if configured_genai_mock_mode %}Modo mock{% else %}Modo API{% endif %}
-            </span>
+        <div class="table-header">
+            <div>
+                <p class="eyebrow">Entrada da demonstracao</p>
+                <h2>Classificacao assistida</h2>
+            </div>
+            <div class="status-badges">
+                <span class="state-pill {% if configured_genai_provider == 'mock' %}state-pill--warning{% else %}state-pill--info{% endif %}">
+                    Provider configurado: {{ configured_genai_provider_label }}
+                </span>
+                <span class="state-pill {% if configured_genai_mock_mode %}state-pill--warning{% else %}state-pill--success{% endif %}">
+                    {% if configured_genai_mock_mode %}Modo mock{% else %}Modo API{% endif %}
+                </span>
+            </div>
         </div>
 
         <form method="post" class="upload-form">
@@ -67,14 +47,17 @@
                 placeholder="Descreva aqui o caso operacional para refinamento de classe detalhada."
             >{{ text_input }}</textarea>
 
-            <button type="submit" class="button button-primary">Classificar com GenAI</button>
+            <div class="action-row">
+                <button type="submit" class="button button-primary">Classificar com GenAI</button>
+                <a class="button button-secondary" href="{{ url_for('pipeline.predict') }}">Voltar para /predict</a>
+            </div>
         </form>
     </div>
 
-    <aside class="panel panel-inner">
+    <aside class="panel panel-inner panel-subtle">
         <p class="eyebrow">Escopo valido</p>
         <h2>Classes detalhadas permitidas</h2>
-        <p>A camada GenAI fica restrita ao conjunto coerente com a macroclasse selecionada.</p>
+        <p>O refino fica restrito ao conjunto coerente com a macro selecionada.</p>
         <ul class="tag-list">
             {% for detail in selected_entry.detail_options %}
                 <li>{{ detail }}</li>
@@ -90,50 +73,31 @@
             <strong>{{ genai_result.provider }}</strong>
         </article>
         <article class="metric-card">
-            <span>Provider solicitado</span>
-            <strong>{{ genai_result.requested_provider }}</strong>
+            <span>Macro selecionada</span>
+            <strong>{{ selected_macro }}</strong>
         </article>
         <article class="metric-card">
-            <span>Modelo</span>
-            <strong>{{ genai_result.model }}</strong>
+            <span>Classe sugerida</span>
+            <strong>{{ genai_result.result.detailed_class }}</strong>
         </article>
         <article class="metric-card">
             <span>Modo</span>
             <strong>{{ genai_result.mode }}</strong>
         </article>
-        <article class="metric-card">
-            <span>Ambiguidade</span>
-            <strong>{% if genai_result.result.ambiguous_case %}Sim{% else %}Nao{% endif %}</strong>
-        </article>
     </section>
 
-    {% if genai_result.fallback_reason %}
-        <section class="panel">
-            <h2>Fallback aplicado</h2>
-            <p>
-                O provider remoto falhou e a resposta foi gerada em modo mock para manter a demonstracao operante.
-            </p>
-            <ul class="distribution-list">
-                <li><span>Motivo</span><strong>{{ genai_result.fallback_reason }}</strong></li>
-                <li><span>Origem da chave</span><strong>{{ genai_result.api_key_source or "nao aplicavel" }}</strong></li>
-            </ul>
-        </section>
-    {% endif %}
-
-    <section class="charts-grid">
-        <article class="panel chart-panel">
+    <section class="predict-summary-grid">
+        <article class="panel">
             <div class="table-header">
                 <div>
                     <p class="eyebrow">Resposta estruturada</p>
                     <h2>Sugestao do LLM</h2>
                 </div>
-                <p>Saida pronta para apoio operacional e revisao humana.</p>
-            </div>
-            <div class="status-badges">
-                <span class="state-pill {% if genai_result.provider == 'groq' %}state-pill--success{% elif genai_result.provider == 'mock' %}state-pill--warning{% else %}state-pill--danger{% endif %}">
-                    Provider efetivo: {{ genai_result.provider }}
-                </span>
-                <span class="state-pill state-pill--info">Provider solicitado: {{ genai_result.requested_provider }}</span>
+                <div class="status-badges">
+                    <span class="state-pill {% if genai_result.provider == 'groq' %}state-pill--success{% elif genai_result.provider == 'mock' %}state-pill--warning{% else %}state-pill--danger{% endif %}">
+                        Provider efetivo: {{ genai_result.provider }}
+                    </span>
+                </div>
             </div>
             <ul class="distribution-list">
                 <li><span>Classe detalhada sugerida</span><strong>{{ genai_result.result.detailed_class }}</strong></li>
@@ -143,16 +107,34 @@
             </ul>
         </article>
 
-        <article class="panel chart-panel">
+        <article class="panel">
             <div class="table-header">
                 <div>
-                    <p class="eyebrow">Prompting</p>
-                    <h2>Prompt estruturado</h2>
+                    <p class="eyebrow">Fallback e modo</p>
+                    <h2>Leitura operacional</h2>
                 </div>
-                <p>Base pronta para evoluir para few-shot contextual com exemplos similares.</p>
+                <p>Visao curta para explicar o comportamento do provider.</p>
             </div>
-            <pre class="report-block">{{ genai_result.prompt }}</pre>
+            <ul class="distribution-list">
+                <li><span>Provider solicitado</span><strong>{{ genai_result.requested_provider }}</strong></li>
+                <li><span>Provider efetivo</span><strong>{{ genai_result.provider }}</strong></li>
+                <li><span>Modo</span><strong>{{ genai_result.mode }}</strong></li>
+                <li><span>Origem da chave</span><strong>{{ genai_result.api_key_source or "nao aplicavel" }}</strong></li>
+            </ul>
+            {% if genai_result.fallback_reason %}
+                <div class="predict-alert">
+                    <strong>Fallback aplicado</strong>
+                    <p>{{ genai_result.fallback_reason }}</p>
+                </div>
+            {% endif %}
         </article>
     </section>
+
+    <details class="panel details-panel">
+        <summary>Exibir prompt estruturado</summary>
+        <div class="details-panel__content">
+            <pre class="report-block">{{ genai_result.prompt }}</pre>
+        </div>
+    </details>
 {% endif %}
 {% endblock %}

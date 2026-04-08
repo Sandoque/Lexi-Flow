@@ -21,24 +21,18 @@
                 </a>
                 <nav class="nav">
                     <a class="nav__link {% if request.endpoint == 'main.index' %}nav__link--active{% endif %}" href="{{ url_for('main.index') }}">Inicio</a>
-                    <a class="nav__link {% if request.endpoint == 'main.architecture' %}nav__link--active{% endif %}" href="{{ url_for('main.architecture') }}">Arquitetura</a>
-                    <a class="nav__link {% if request.endpoint == 'pipeline.upload' %}nav__link--active{% endif %}" href="{{ url_for('pipeline.upload') }}">Upload CSV</a>
-                    <a class="nav__link {% if request.endpoint == 'pipeline.eda' %}nav__link--active{% endif %}" href="{{ url_for('pipeline.eda') }}">EDA</a>
+                    <a class="nav__link {% if request.endpoint == 'pipeline.eda' %}nav__link--active{% endif %}" href="{{ url_for('pipeline.eda', dataset_source=session.get('dataset_source')) }}">EDA</a>
                     <a class="nav__link {% if request.endpoint == 'pipeline.baseline' %}nav__link--active{% endif %}" href="{{ url_for('pipeline.baseline') }}">Baseline</a>
                     <a class="nav__link {% if request.endpoint == 'pipeline.predict' %}nav__link--active{% endif %}" href="{{ url_for('pipeline.predict') }}">Predicao</a>
                     <a class="nav__link {% if request.endpoint == 'pipeline.genai_demo' %}nav__link--active{% endif %}" href="{{ url_for('pipeline.genai_demo') }}">GenAI Demo</a>
-                    <a class="nav__link {% if request.endpoint == 'pipeline.results' %}nav__link--active{% endif %}" href="{{ url_for('pipeline.results') }}">Resultados</a>
-                    <a class="nav__link {% if request.endpoint == 'main.health' %}nav__link--active{% endif %}" href="{{ url_for('main.health') }}">Health</a>
+                    <a class="nav__link {% if request.endpoint == 'main.architecture' %}nav__link--active{% endif %}" href="{{ url_for('main.architecture') }}">Arquitetura</a>
                 </nav>
-            </div>
-            <div class="header-status">
-                <span class="state-pill state-pill--info">GenAI configurada: {{ configured_genai_provider_label }}</span>
-                <span class="state-pill {% if configured_genai_mock_mode %}state-pill--warning{% else %}state-pill--success{% endif %}">
-                    {% if configured_genai_mock_mode %}Modo mock{% else %}Modo API{% endif %}
-                </span>
-                {% if session.get('dataset_source') == 'demo' %}
-                    <span class="state-pill state-pill--accent">Dataset demo ativo</span>
-                {% endif %}
+                <div class="header-status">
+                    <span class="state-pill state-pill--info">GenAI configurada: {{ configured_genai_provider_label }}</span>
+                    {% if session.get('dataset_source') == 'demo' %}
+                        <span class="state-pill state-pill--accent">Dataset demo ativo</span>
+                    {% endif %}
+                </div>
             </div>
         </div>
     </header>

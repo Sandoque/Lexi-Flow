@@ -5,7 +5,7 @@
 {% block content %}
 <section class="section-heading">
     <div>
-        <p class="eyebrow">Analise exploratoria</p>
+        <p class="eyebrow">Etapa 02 · Analise exploratoria</p>
         <h1>Painel inicial do dataset</h1>
     </div>
     <p>
@@ -29,23 +29,8 @@
     <div class="action-row">
         <a class="button {% if not using_demo_dataset %}button-primary{% else %}button-secondary{% endif %}" href="{{ url_for('pipeline.eda', dataset_source='upload') }}">Usar ultimo upload</a>
         <a class="button {% if using_demo_dataset %}button-primary{% else %}button-secondary{% endif %}" href="{{ url_for('pipeline.eda', dataset_source='demo') }}">Usar dataset demo</a>
+        <a class="button button-secondary" href="{{ url_for('pipeline.baseline', dataset_source=dataset_source) }}">Seguir para baseline</a>
     </div>
-</section>
-
-<section class="hero-panel hero-panel--compact">
-    <div class="hero-panel__content">
-        <p class="eyebrow">Arquivo analisado</p>
-        <h1>{{ eda_result.dataset.filename }}</h1>
-        <p class="hero-panel__description">
-            O painel abaixo foi calculado a partir do arquivo salvo em <code>data/raw/</code>. A analise usa pandas
-            para consolidacao das metricas e matplotlib para gerar visualizacoes de apoio.
-        </p>
-    </div>
-    <aside class="hero-panel__highlight">
-        <p class="highlight-label">Cobertura da EDA</p>
-        <strong>{{ eda_result.dataset.row_count }} registros processados</strong>
-        <span>{{ eda_result.dataset.column_count }} colunas detectadas no dataset atual.</span>
-    </aside>
 </section>
 
 <section class="metrics-grid">

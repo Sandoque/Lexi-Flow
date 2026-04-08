@@ -5,10 +5,10 @@
 {% block content %}
 <section class="section-heading">
     <div>
-        <p class="eyebrow">Modulo de ingestao</p>
+        <p class="eyebrow">Tela dedicada de ingestao</p>
         <h1>Upload de CSV</h1>
     </div>
-    <p>Envie uma base textual em formato CSV para iniciar o fluxo de validacao, exploracao e classificacao.</p>
+    <p>A ingestao principal agora tambem aparece no Inicio, e esta tela segue como apoio para cargas dedicadas.</p>
 </section>
 
 <section class="panel dataset-mode-panel">
@@ -32,10 +32,7 @@
 <section class="panel panel-upload">
     <div>
         <h2>Entrada inicial do pipeline</h2>
-        <p>
-            Esta camada recebe o arquivo, valida o formato, checa a estrutura do dataset e persiste o CSV em
-            <code>data/raw/</code>.
-        </p>
+        <p>Valida formato, checa colunas obrigatorias e salva o arquivo em <code>data/raw/</code>.</p>
         <div class="expected-columns">
             <h3>Colunas obrigatorias</h3>
             <ul class="tag-list">

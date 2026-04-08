@@ -3,67 +3,38 @@
 {% block title %}{{ app_name }} | Predicao{% endblock %}
 
 {% block content %}
-<section class="hero-panel hero-panel--compact">
-    <article class="hero-panel__content">
-        <p class="eyebrow">Inferencia ponta a ponta</p>
+<section class="section-heading">
+    <div>
+        <p class="eyebrow">Etapas 05 e 06 · Refinamento e operacao</p>
         <h1>Predicao assistida em fluxo real</h1>
-        <p class="hero-panel__description">
-            Cole um novo texto e deixe o LexiFlow executar o pipeline completo: NLP, classificacao macro,
-            sugestao detalhada baseline e refinamento complementar com GenAI.
-        </p>
-        <div class="hero-panel__actions">
-            <a class="button button-secondary" href="{{ url_for('pipeline.baseline') }}">Treinar baseline</a>
-            <a class="button button-secondary" href="{{ url_for('pipeline.genai_demo') }}">Abrir GenAI Demo</a>
-        </div>
-    </article>
-
-    <aside class="hero-panel__highlight">
-        <p class="highlight-label">Papel da GenAI</p>
-        <strong>Complementar, nao substitutiva</strong>
-        <span>
-            O baseline hierarquico define a macroclasse e restringe o espaco de busca. A GenAI entra depois,
-            explicando e refinando a classe detalhada com contexto operacional.
-        </span>
-    </aside>
+    </div>
+    <p>Entrada nova, baseline hierarquico, GenAI complementar e decisao operacional na mesma leitura.</p>
 </section>
 
 {% if not artifacts_ready %}
     <section class="panel">
         <p class="eyebrow">Dependencia de modelo</p>
         <h2>Artefatos ainda nao disponiveis</h2>
-        <p>
-            Para usar a inferencia real, treine primeiro o baseline hierarquico. A rota <code>/predict</code>
-            reaproveita os artefatos salvos em <code>data/artifacts</code>.
-        </p>
+        <p>Treine primeiro o baseline para habilitar a inferencia ponta a ponta.</p>
         <div class="action-row">
             <a class="button button-primary" href="{{ url_for('pipeline.baseline', dataset_source=dataset_source) }}">Ir para /baseline</a>
         </div>
     </section>
 {% endif %}
 
-<section class="panel dataset-mode-panel">
-    <div>
-        <p class="eyebrow">Alternancia de fonte</p>
-        <h2>Modo atual para treino: {{ dataset_source_label }}</h2>
-        <p>
-            {% if using_demo_dataset %}
-                Use este modo para apresentacao presencial sem depender de upload ao vivo.
-            {% else %}
-                Use este modo quando quiser treinar e demonstrar com um dataset real carregado na sessao.
-            {% endif %}
-        </p>
-    </div>
-    <div class="action-row">
-        <a class="button {% if not using_demo_dataset %}button-primary{% else %}button-secondary{% endif %}" href="{{ url_for('pipeline.baseline', dataset_source='upload') }}">Treinar com ultimo upload</a>
-        <a class="button {% if using_demo_dataset %}button-primary{% else %}button-secondary{% endif %}" href="{{ url_for('pipeline.baseline', dataset_source='demo') }}">Treinar com dataset demo</a>
-    </div>
-</section>
-
 <section class="panel prediction-layout">
     <div>
-        <p class="eyebrow">Entrada</p>
-        <h2>Novo caso para classificacao</h2>
-        <p>O texto original e preservado. O pre-processamento e aplicado antes da previsao macro.</p>
+        <div class="table-header">
+            <div>
+                <p class="eyebrow">Entrada</p>
+                <h2>Novo caso para classificacao</h2>
+            </div>
+            <div class="status-badges">
+                <span class="state-pill {% if using_demo_dataset %}state-pill--accent{% else %}state-pill--info{% endif %}">
+                    Base de treino: {{ dataset_source_label }}
+                </span>
+            </div>
+        </div>
 
         <form method="post" class="upload-form">
             <input type="hidden" name="dataset_source" value="{{ dataset_source }}">
@@ -80,43 +51,30 @@
             <textarea
                 id="text_input"
                 name="text_input"
-                rows="10"
+                rows="9"
                 class="textarea-input"
                 placeholder="Cole aqui um novo texto para classificacao assistida."
             >{{ text_input }}</textarea>
 
-            <button type="submit" class="button button-primary">Executar inferencia</button>
+            <div class="action-row">
+                <button type="submit" class="button button-primary">Executar inferencia</button>
+                <a class="button button-secondary" href="{{ url_for('pipeline.baseline', dataset_source=dataset_source) }}">Rever baseline</a>
+                <a class="button button-secondary" href="{{ url_for('pipeline.genai_demo') }}">Abrir GenAI Demo</a>
+            </div>
         </form>
     </div>
 
-    <aside class="panel panel-inner">
-        <p class="eyebrow">Fluxo aplicado</p>
-        <h2>Pipeline em producao assistida</h2>
+    <aside class="panel panel-inner panel-subtle">
+        <p class="eyebrow">Leitura da demo</p>
+        <h2>O que esta em foco</h2>
         <ul class="distribution-list">
-            <li><span>1. NLP</span><strong>normalizacao e tokenizacao</strong></li>
-            <li><span>2. Baseline macro</span><strong>TF-IDF + Logistic Regression</strong></li>
-            <li><span>3. Filtro detalhado</span><strong>somente classes da macro prevista</strong></li>
-            <li><span>4. GenAI</span><strong>refinamento explicavel</strong></li>
+            <li><span>1. Macro prevista</span><strong>decisao do baseline</strong></li>
+            <li><span>2. Confianca</span><strong>sinal para operacao</strong></li>
+            <li><span>3. Classe detalhada</span><strong>refinamento final</strong></li>
+            <li><span>4. Provider usado</span><strong>mock ou groq</strong></li>
+            <li><span>5. Fluxo operacional</span><strong>acao recomendada</strong></li>
         </ul>
     </aside>
-</section>
-
-<section class="panel">
-    <div class="table-header">
-        <div>
-            <p class="eyebrow">Legenda operacional</p>
-            <h2>Racional do roteamento</h2>
-        </div>
-        <p>O nivel de confianca orienta o grau de automacao recomendado para a operacao.</p>
-    </div>
-    <div class="routing-legend">
-        {% for item in routing_legend %}
-            <article class="routing-legend__item">
-                <strong>{{ item.level }}</strong>
-                <p>{{ item.description }}</p>
-            </article>
-        {% endfor %}
-    </div>
 </section>
 
 {% if prediction_result %}
@@ -126,12 +84,8 @@
             <strong>{{ prediction_result.baseline.macro_class }}</strong>
         </article>
         <article class="metric-card">
-            <span>Confianca macro</span>
+            <span>Confianca</span>
             <strong>{{ prediction_result.baseline.macro_confidence_percent }}</strong>
-        </article>
-        <article class="metric-card">
-            <span>Faixa de confianca</span>
-            <strong>{{ prediction_result.baseline.confidence_band }}</strong>
         </article>
         <article class="metric-card">
             <span>Classe detalhada final</span>
@@ -143,90 +97,27 @@
         </article>
     </section>
 
-    <section class="panel dataset-mode-panel">
-        <div>
-            <p class="eyebrow">Fonte do modelo atual</p>
-            <h2>{{ prediction_result.artifacts.dataset_source_label }}</h2>
-            <p>
-                {% if prediction_result.artifacts.dataset_is_demo %}
-                    Os artefatos usados nesta inferencia foram treinados com o dataset demo.
-                {% else %}
-                    Os artefatos usados nesta inferencia foram treinados com o ultimo upload valido.
-                {% endif %}
-            </p>
-        </div>
-        <div class="action-row">
-            <a class="button button-secondary" href="{{ url_for('pipeline.baseline', dataset_source=prediction_result.artifacts.dataset_source) }}">Reabrir baseline desta fonte</a>
-        </div>
-    </section>
-
     <section class="predict-summary-grid">
         <article class="panel">
             <div class="table-header">
                 <div>
-                    <p class="eyebrow">Entrada e NLP</p>
-                    <h2>Texto processado</h2>
+                    <p class="eyebrow">Decisao da classificacao</p>
+                    <h2>Saida consolidada</h2>
                 </div>
-                <p>Etapas aplicadas: {{ prediction_result.baseline.preprocessing_steps|join(", ") }}</p>
-            </div>
-            <ul class="distribution-list">
-                <li><span>Canal de origem</span><strong>{{ prediction_result.input.channel_origin or "Nao informado" }}</strong></li>
-                <li><span>Texto original</span><strong>{{ prediction_result.input.original_text }}</strong></li>
-                <li><span>Texto processado</span><strong>{{ prediction_result.input.processed_text }}</strong></li>
-            </ul>
-        </article>
-
-        <article class="panel">
-            <div class="table-header">
-                <div>
-                    <p class="eyebrow">Baseline hierarquico</p>
-                    <h2>Predicao estatistica</h2>
+                <div class="status-badges">
+                    <span class="state-pill {% if prediction_result.genai.provider == 'groq' %}state-pill--success{% elif prediction_result.genai.provider == 'mock' %}state-pill--warning{% else %}state-pill--danger{% endif %}">
+                        Provider efetivo: {{ prediction_result.genai.provider }}
+                    </span>
+                    <span class="state-pill state-pill--info">Modo: {{ prediction_result.genai.mode }}</span>
                 </div>
-                <p>O filtro detalhado segue apenas as opcoes coerentes com a macro prevista.</p>
             </div>
             <ul class="distribution-list">
                 <li><span>Macro prevista</span><strong>{{ prediction_result.baseline.macro_class }}</strong></li>
-                <li><span>Score da macro</span><strong>{{ prediction_result.baseline.macro_confidence_percent }}</strong></li>
-                <li><span>Sugestao inicial detalhada</span><strong>{{ prediction_result.genai.baseline_detail }}</strong></li>
-            </ul>
-            <div class="expected-columns">
-                <h3>Classes detalhadas validas da macro</h3>
-                <ul class="tag-list">
-                    {% for detail in prediction_result.baseline.valid_detailed_classes %}
-                        <li>{{ detail }}</li>
-                    {% endfor %}
-                </ul>
-            </div>
-        </article>
-    </section>
-
-    <section class="predict-summary-grid">
-        <article class="panel">
-            <div class="table-header">
-                <div>
-                    <p class="eyebrow">Refinamento GenAI</p>
-                    <h2>Saida complementar</h2>
-                </div>
-                <p>A camada generativa explica e prioriza, sem substituir o baseline.</p>
-            </div>
-            <ul class="distribution-list">
                 <li><span>Classe detalhada sugerida</span><strong>{{ prediction_result.genai.detailed_class }}</strong></li>
                 <li><span>Justificativa</span><strong>{{ prediction_result.genai.justification }}</strong></li>
                 <li><span>Prioridade sugerida</span><strong>{{ prediction_result.genai.priority }}</strong></li>
                 <li><span>Caso ambiguo</span><strong>{% if prediction_result.genai.ambiguous_case %}Sim{% else %}Nao{% endif %}</strong></li>
-                <li><span>Provider usado</span><strong>{{ prediction_result.genai.provider }}</strong></li>
-                <li><span>Casos similares como apoio</span><strong>{% if prediction_result.genai.similar_examples_used %}Sim{% else %}Nao{% endif %}</strong></li>
             </ul>
-            <div class="status-badges">
-                <span class="state-pill {% if prediction_result.genai.provider == 'groq' %}state-pill--success{% elif prediction_result.genai.provider == 'mock' %}state-pill--warning{% else %}state-pill--danger{% endif %}">
-                    Provider efetivo: {{ prediction_result.genai.provider }}
-                </span>
-                <span class="state-pill state-pill--info">Modo: {{ prediction_result.genai.mode }}</span>
-                {% if prediction_result.genai.similar_examples_used %}
-                    <span class="state-pill state-pill--accent">Few-shot contextual ativo</span>
-                {% endif %}
-            </div>
-
             {% if prediction_result.genai.fallback_reason %}
                 <div class="predict-alert">
                     <strong>Observacao operacional</strong>
@@ -238,10 +129,10 @@
         <article class="panel">
             <div class="table-header">
                 <div>
-                    <p class="eyebrow">Operacao assistida</p>
+                    <p class="eyebrow">Fluxo operacional</p>
                     <h2>Fluxo Operacional Recomendado</h2>
                 </div>
-                <p>O roteamento combina confianca do baseline, ambiguidade e suporte da GenAI.</p>
+                <p>Leitura principal para o publico de negocio.</p>
             </div>
             <div class="routing-card routing-card--{{ prediction_result.routing.badge_tone }}">
                 <span class="routing-card__label">Decisao</span>
@@ -250,47 +141,75 @@
             </div>
             <ul class="distribution-list">
                 <li><span>Nivel de confianca</span><strong>{{ prediction_result.routing.confidence_level }}</strong></li>
-                <li><span>Motivo do roteamento</span><strong>{{ prediction_result.routing.reason }}</strong></li>
                 <li><span>Acao sugerida</span><strong>{{ prediction_result.routing.action }}</strong></li>
                 <li><span>Observacao para o operador</span><strong>{{ prediction_result.routing.operator_note }}</strong></li>
                 <li><span>Fila recomendada</span><strong>{{ prediction_result.routing.queue }}</strong></li>
             </ul>
-            <div class="predict-alert predict-alert--soft">
-                <strong>Preparado para feedback humano</strong>
-                <p>
-                    Esta estrutura ja separa a decisao operacional do restante da inferencia e pode receber,
-                    em seguida, registro de aceite, correcao ou override do operador.
-                </p>
-            </div>
         </article>
     </section>
 
-    {% if prediction_result.genai.similar_examples_used %}
-        <section class="panel">
-            <div class="table-header">
-                <div>
-                    <p class="eyebrow">Few-shot contextual</p>
-                    <h2>Casos similares usados como apoio</h2>
-                </div>
-                <p>
-                    O LexiFlow recuperou exemplos historicos parecidos com o texto atual para enriquecer o contexto do LLM.
-                </p>
-            </div>
-            <ul class="distribution-list">
-                <li><span>Estrategia</span><strong>{{ prediction_result.genai.similar_examples_strategy }}</strong></li>
-                <li><span>Escopo de busca</span><strong>{{ prediction_result.genai.similar_examples_scope }}</strong></li>
-                <li><span>Total de exemplos</span><strong>{{ prediction_result.genai.similar_examples_count }}</strong></li>
-            </ul>
-            <div class="examples-grid">
-                {% for example in prediction_result.genai.similar_examples_support %}
-                    <article class="example-group">
-                        <span>Similaridade {{ example.similarity_percent }}</span>
-                        <strong>{{ example.macro_class }} -> {{ example.detailed_class }}</strong>
-                        <p>{{ example.text }}</p>
-                    </article>
-                {% endfor %}
-            </div>
-        </section>
-    {% endif %}
+    <details class="panel details-panel">
+        <summary>Detalhes tecnicos opcionais</summary>
+        <div class="details-panel__content">
+            <section class="predict-summary-grid">
+                <article class="panel panel-subtle">
+                    <div class="table-header">
+                        <div>
+                            <p class="eyebrow">NLP e baseline</p>
+                            <h2>Predicao estatistica</h2>
+                        </div>
+                        <p>Informacoes uteis para leitura tecnica.</p>
+                    </div>
+                    <ul class="distribution-list">
+                        <li><span>Canal de origem</span><strong>{{ prediction_result.input.channel_origin or "Nao informado" }}</strong></li>
+                        <li><span>Texto original</span><strong>{{ prediction_result.input.original_text }}</strong></li>
+                        <li><span>Texto processado</span><strong>{{ prediction_result.input.processed_text }}</strong></li>
+                        <li><span>Sugestao inicial detalhada</span><strong>{{ prediction_result.genai.baseline_detail }}</strong></li>
+                    </ul>
+                </article>
+
+                <article class="panel panel-subtle">
+                    <div class="table-header">
+                        <div>
+                            <p class="eyebrow">Contexto</p>
+                            <h2>Fonte do modelo atual</h2>
+                        </div>
+                        <p>Visao expandida do contexto enviado ao refinamento.</p>
+                    </div>
+                    <ul class="distribution-list">
+                        <li><span>Classes validas da macro</span><strong>{{ prediction_result.baseline.valid_detailed_classes|length }}</strong></li>
+                        <li><span>Casos similares como apoio</span><strong>{% if prediction_result.genai.similar_examples_used %}{{ prediction_result.genai.similar_examples_count }}{% else %}0{% endif %}</strong></li>
+                        <li><span>Fonte do modelo</span><strong>{{ prediction_result.artifacts.dataset_source_label }}</strong></li>
+                    </ul>
+                    <ul class="tag-list">
+                        {% for detail in prediction_result.baseline.valid_detailed_classes %}
+                            <li>{{ detail }}</li>
+                        {% endfor %}
+                    </ul>
+                </article>
+            </section>
+
+            {% if prediction_result.genai.similar_examples_used %}
+                <section class="panel panel-subtle">
+                    <div class="table-header">
+                        <div>
+                            <p class="eyebrow">Few-shot contextual</p>
+                            <h2>Casos similares usados como apoio</h2>
+                        </div>
+                        <p>{{ prediction_result.genai.similar_examples_strategy }} no escopo {{ prediction_result.genai.similar_examples_scope }}.</p>
+                    </div>
+                    <div class="examples-grid">
+                        {% for example in prediction_result.genai.similar_examples_support %}
+                            <article class="example-group">
+                                <span>Similaridade {{ example.similarity_percent }}</span>
+                                <strong>{{ example.macro_class }} -> {{ example.detailed_class }}</strong>
+                                <p>{{ example.text }}</p>
+                            </article>
+                        {% endfor %}
+                    </div>
+                </section>
+            {% endif %}
+        </div>
+    </details>
 {% endif %}
 {% endblock %}
