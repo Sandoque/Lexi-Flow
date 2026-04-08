@@ -95,13 +95,21 @@ def recuperar_exemplos_similares(
         key=lambda index: float(similarities[index]),
         reverse=True,
     )
-    top_indices = ranked_indices[: max(top_k, 0)]
-
     support_examples: list[dict[str, Any]] = []
     few_shot_examples: list[FewShotExample] = []
+    selected_signatures: set[tuple[str, str, str]] = set()
+    max_examples = max(top_k, 0)
 
-    for index in top_indices:
+    for index in ranked_indices:
+        if len(few_shot_examples) >= max_examples:
+            break
+
         row = working_df.iloc[index]
+        signature = construir_assinatura_exemplo(row)
+        if signature in selected_signatures:
+            continue
+
+        selected_signatures.add(signature)
         similarity = round(float(similarities[index]), 4)
         support_examples.append(
             {
@@ -133,6 +141,15 @@ def recuperar_exemplos_similares(
         "scope": scope,
         "used_count": len(few_shot_examples),
     }
+
+
+def construir_assinatura_exemplo(row: pd.Series) -> tuple[str, str, str]:
+    """Cria uma assinatura estável para evitar duplicatas no few-shot contextual."""
+    return (
+        str(row["texto_original"]).strip(),
+        str(row["classe_macro"]).strip(),
+        str(row["classe_detalhada"]).strip(),
+    )
 
 
 def recuperar_exemplos_similares_dos_artefatos(

@@ -27,7 +27,7 @@
     </aside>
 </section>
 
-<section class="card-grid">
+<section class="card-grid card-grid--three">
     {% for item in case_context_cards %}
         <article class="card">
             <h3>{{ item.title }}</h3>
@@ -54,9 +54,6 @@
             <h3>{{ layer.title }}</h3>
             <p>{{ layer.description }}</p>
         </article>
-        {% if not loop.last %}
-            <div class="architecture-arrow" aria-hidden="true">→</div>
-        {% endif %}
     {% endfor %}
 </section>
 
@@ -71,7 +68,7 @@
     </p>
 </section>
 
-<section class="card-grid">
+<section class="card-grid card-grid--two">
     {% for item in business_impacts %}
         <article class="card">
             <h3>{{ item.title }}</h3>
@@ -83,18 +80,28 @@
 <section class="section-heading">
     <div>
         <p class="eyebrow">Decisões técnicas</p>
-        <h2>Por que a solução foi desenhada assim</h2>
+        <h2>Três princípios de desenho da solução</h2>
     </div>
-    <p>Essas três decisões sustentam a narrativa técnica do case sem tornar a arquitetura excessivamente complexa.</p>
+    <p>Esse bloco explica por que o LexiFlow combina baseline supervisionado, hierarquia macro -> detalhada e GenAI apenas como camada complementar.</p>
 </section>
 
-<section class="card-grid">
-    {% for item in technical_decisions %}
-        <article class="card">
-            <h3>{{ item.title }}</h3>
-            <p>{{ item.description }}</p>
-        </article>
-    {% endfor %}
+<section class="panel decision-section">
+    <div class="table-header">
+        <div>
+            <p class="eyebrow">Narrativa técnica</p>
+            <h2>O desenho evita complexidade desnecessária</h2>
+        </div>
+        <p>As decisões abaixo mantêm o case explicável, demonstrável e aderente ao problema de negócio da XPTO.</p>
+    </div>
+    <div class="decision-grid">
+        {% for item in technical_decisions %}
+            <article class="decision-card">
+                <span class="decision-card__step">Princípio {{ loop.index }}</span>
+                <h3>{{ item.title }}</h3>
+                <p>{{ item.description }}</p>
+            </article>
+        {% endfor %}
+    </div>
 </section>
 
 <section class="panel">

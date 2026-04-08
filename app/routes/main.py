@@ -54,22 +54,22 @@ TECHNICAL_DECISIONS = [
     {
         "title": "Por que baseline supervisionado primeiro",
         "description": (
-            "Porque o case pede uma estratégia de classificação defensável, com treino rápido, avaliação clara "
-            "e capacidade de explicar o comportamento do modelo."
+            "Porque o case pede uma referência forte, rápida de treinar e fácil de avaliar antes de adicionar "
+            "camadas mais custosas ou menos controladas."
         ),
     },
     {
         "title": "Por que modelar em dois níveis",
         "description": (
-            "Porque a triagem real depende de taxonomia: primeiro entender a natureza do problema, depois "
-            "escolher o motivo detalhado dentro desse contexto."
+            "Porque a triagem real é taxonômica: primeiro entender a natureza do caso e depois restringir o "
+            "motivo detalhado dentro desse contexto."
         ),
     },
     {
         "title": "Por que GenAI entra depois",
         "description": (
-            "Porque a camada generativa agrega explicabilidade, prioridade e refinamento contextual sem substituir "
-            "o baseline supervisionado como referência principal."
+            "Porque a GenAI agrega explicação, prioridade e refinamento contextual sem substituir o baseline "
+            "supervisionado como referência principal."
         ),
     },
 ]
