@@ -8,12 +8,12 @@
         <p class="eyebrow">Arquitetura do case</p>
         <h1>Visao de produto da solucao</h1>
         <p class="hero-panel__description">
-            O LexiFlow combina baseline supervisionado e IA generativa com critério, preservando governança,
-            explicabilidade e orientação operacional ao longo de todo o fluxo.
+            O LexiFlow foi desenhado para a realidade da XPTO: textos vindos de clientes e canais internos,
+            triagem manual custosa e necessidade de priorizacao com criterio ao longo do fluxo.
         </p>
         <div class="hero-panel__actions">
-            <a class="button button-primary" href="{{ url_for('pipeline.predict') }}">Ver inferencia real</a>
-            <a class="button button-secondary" href="{{ url_for('pipeline.baseline') }}">Abrir baseline</a>
+            <a class="button button-primary" href="{{ url_for('main.index') }}">Abrir inicio do fluxo</a>
+            <a class="button button-secondary" href="{{ url_for('pipeline.predict') }}">Ver inferencia real</a>
         </div>
     </article>
 
@@ -21,10 +21,19 @@
         <p class="highlight-label">Mensagem central</p>
         <strong>Baseline robusto com GenAI complementar</strong>
         <span>
-            A arquitetura foi desenhada para equilibrar performance supervisionada, refinamento semântico
-            e decisão operacional assistida sem depender exclusivamente de LLM.
+            A arquitetura equilibra performance supervisionada, refinamento semantico e decisao operacional
+            assistida sem depender exclusivamente de LLM.
         </span>
     </aside>
+</section>
+
+<section class="card-grid">
+    {% for item in case_context_cards %}
+        <article class="card">
+            <h3>{{ item.title }}</h3>
+            <p>{{ item.description }}</p>
+        </article>
+    {% endfor %}
 </section>
 
 <section class="section-heading">
@@ -48,6 +57,26 @@
         {% if not loop.last %}
             <div class="architecture-arrow" aria-hidden="true">→</div>
         {% endif %}
+    {% endfor %}
+</section>
+
+<section class="section-heading">
+    <div>
+        <p class="eyebrow">Impacto esperado</p>
+        <h2>Como a solucao responde as dores do case</h2>
+    </div>
+    <p>
+        O ganho de negocio aparece quando a classificacao deixa de ser apenas uma previsao e passa a orientar
+        fila, SLA, priorizacao e leitura gerencial dos principais problemas.
+    </p>
+</section>
+
+<section class="card-grid">
+    {% for item in business_impacts %}
+        <article class="card">
+            <h3>{{ item.title }}</h3>
+            <p>{{ item.description }}</p>
+        </article>
     {% endfor %}
 </section>
 
@@ -75,8 +104,8 @@
         <h2>Do dado bruto à decisão operacional</h2>
     </div>
     <p>
-        A narrativa da solução fica clara: ingestão controlada, entendimento do corpus, baseline confiável,
-        refinamento generativo e uma camada final orientada à operação real.
+        A narrativa da solucao fica clara: ingestao controlada, entendimento do corpus, baseline confiavel,
+        refinamento generativo e uma camada final orientada a triagem real da XPTO.
     </p>
 </section>
 {% endblock %}

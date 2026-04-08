@@ -9,19 +9,39 @@
         <h1>{{ app_name }}</h1>
         <p class="hero-panel__subtitle">{{ app_subtitle }}</p>
         <p class="hero-panel__description">
-            Aplicacao web para receber bases textuais em CSV, validar estrutura, explorar o corpus,
-            produzir classificacao hierarquica, refinar resultados com IA generativa e orientar a operacao com criterio.
+            Solucao criada para o case da XPTO Data Solutions, empresa que recebe diariamente chamados de suporte,
+            solicitacoes de clientes, relatos operacionais e feedbacks textuais sem categorizacao automatica.
         </p>
         <div class="hero-panel__actions">
             <a class="button button-primary" href="#ingestao">Iniciar pela ingestao</a>
-            <a class="button button-secondary" href="{{ url_for('pipeline.eda', dataset_source=dataset_source) }}">Seguir para EDA</a>
+            <a class="button button-secondary" href="#contexto-xpto">Entender o problema</a>
         </div>
     </div>
     <aside class="hero-panel__highlight">
         <p class="highlight-label">Leitura da demonstracao</p>
         <strong>Jornada sequencial do case</strong>
-        <span>Comece pela ingestao, avance para a leitura exploratoria e siga ate a classificacao assistida.</span>
+        <span>Comece pela ingestao, avance para a leitura exploratoria e siga ate a classificacao assistida com foco em triagem e priorizacao.</span>
     </aside>
+</section>
+
+<section id="contexto-xpto" class="section-heading">
+    <div>
+        <p class="eyebrow">Contexto do negocio</p>
+        <h2>O problema que a XPTO quer resolver</h2>
+    </div>
+    <p>
+        A empresa atua com solucoes de dados, automacao e IA para clientes de logistica, servicos financeiros
+        e varejo digital. O gargalo atual esta na leitura manual de textos que chegam por multiplos canais.
+    </p>
+</section>
+
+<section class="card-grid">
+    {% for item in case_context_cards %}
+        <article class="card">
+            <h3>{{ item.title }}</h3>
+            <p>{{ item.description }}</p>
+        </article>
+    {% endfor %}
 </section>
 
 <section class="section-heading">
@@ -96,16 +116,36 @@
     {% endfor %}
 </section>
 
+<section class="section-heading">
+    <div>
+        <p class="eyebrow">Impacto esperado</p>
+        <h2>Valor direto para a operacao</h2>
+    </div>
+    <p>
+        A proposta nao e apenas classificar textos. Ela busca transformar triagem textual em um fluxo
+        de dados mais rapido, mais mensuravel e mais util para a tomada de decisao.
+    </p>
+</section>
+
+<section class="card-grid">
+    {% for item in business_impacts %}
+        <article class="card">
+            <h3>{{ item.title }}</h3>
+            <p>{{ item.description }}</p>
+        </article>
+    {% endfor %}
+</section>
+
 <section class="info-strip">
     <div>
-        <p class="eyebrow">Sequencia sugerida</p>
-        <h2>Siga o fluxo do case de ponta a ponta</h2>
+        <p class="eyebrow">Sequencia oficial da demo</p>
+        <h2>Entrada, entendimento, modelagem e decisao operacional</h2>
     </div>
     <div class="action-row">
-        <a class="button button-secondary" href="{{ url_for('pipeline.eda', dataset_source=dataset_source) }}">1. Abrir EDA</a>
-        <a class="button button-primary" href="{{ url_for('pipeline.baseline', dataset_source=dataset_source) }}">2. Treinar baseline</a>
-        <a class="button button-secondary" href="{{ url_for('pipeline.predict', dataset_source=dataset_source) }}">3. Abrir predicao</a>
-        <a class="button button-secondary" href="{{ url_for('pipeline.genai_demo') }}">4. Ver GenAI Demo</a>
+        <a class="button button-secondary" href="{{ url_for('pipeline.eda', dataset_source=dataset_source) }}">2. Abrir EDA</a>
+        <a class="button button-primary" href="{{ url_for('pipeline.baseline', dataset_source=dataset_source) }}">3. Treinar baseline</a>
+        <a class="button button-secondary" href="{{ url_for('pipeline.predict', dataset_source=dataset_source) }}">4. Abrir predicao</a>
+        <a class="button button-secondary" href="{{ url_for('pipeline.genai_demo') }}">5. Ver GenAI Demo</a>
     </div>
 </section>
 {% endblock %}

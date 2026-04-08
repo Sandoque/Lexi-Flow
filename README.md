@@ -4,18 +4,32 @@ Plataforma de Classificacao Textual Inteligente.
 
 ## Visao Geral
 
-LexiFlow e uma aplicacao Flask com arquitetura profissional para um case de Dados e IA Generativa voltado a classificacao textual. O projeto combina:
+LexiFlow e uma aplicacao Flask com arquitetura profissional para o case da XPTO Data Solutions, empresa que recebe diariamente textos de suporte, solicitacoes de clientes, relatos operacionais e feedbacks textuais sem categorizacao automatica. O projeto combina:
 
 - pipeline supervisionado baseline para classificacao hierarquica
 - camada complementar de IA generativa para refinamento explicavel
 - experiencia web orientada a produto
 - decisao operacional assistida com base em confianca
 
-O objetivo nao e apenas classificar texto, mas transformar o fluxo em uma solucao demonstravel de ponta a ponta, com separacao clara entre ingestao, analise, modelagem, refinamento e operacao.
+O objetivo nao e apenas classificar texto, mas transformar a triagem textual da XPTO em uma solucao demonstravel de ponta a ponta, com separacao clara entre ingestao, analise, modelagem, refinamento e operacao.
 
 ## Problema de Negocio
 
-Em cenarios com grande volume de demandas textuais, como atendimento, suporte, financeiro ou cadastro, a triagem manual tende a ser lenta, inconsistente e pouco escalavel. O desafio do case e estruturar uma solucao que:
+A XPTO Data Solutions atende clientes de logistica, servicos financeiros e varejo digital. No dia a dia, isso se traduz em registros textuais vindos de multiplos canais, como:
+
+- descricoes de chamados de suporte
+- solicitacoes de clientes
+- relatos operacionais
+- feedbacks textuais sobre servicos
+
+Sem categorizacao automatica, esse fluxo gera dores operacionais claras:
+
+- dificuldade de priorizacao
+- alto tempo de resposta
+- falta de metricas por tipo de problema
+- dependencia excessiva de leitura manual
+
+O desafio do case e estruturar uma solucao que:
 
 - receba dados textuais de forma controlada
 - compreenda o corpus com EDA
@@ -36,6 +50,15 @@ LexiFlow implementa um fluxo em camadas:
 7. operacao assistida baseada em confianca
 
 O projeto foi pensado para demonstrar maturidade tecnica e narrativa de produto ao mesmo tempo.
+
+## Impacto Esperado
+
+Mais do que prever classes, a solucao foi pensada para apoiar a operacao da XPTO com resultados claros:
+
+- priorizacao mais rapida de casos criticos
+- reducao da triagem manual repetitiva
+- visibilidade por tipo de problema e canal de origem
+- apoio a decisao para filas, SLA e revisao humana
 
 ## Arquitetura em Camadas
 
@@ -258,11 +281,12 @@ secret.env           Variaveis locais do ambiente
 
 ### Caminho 1. Demonstracao com dataset demo
 
-1. configure `USE_DEMO_DATASET_BY_DEFAULT=true` ou selecione `dataset demo` na interface
-2. abra `/baseline` e treine os artefatos
-3. abra `/predict`
-4. cole um novo texto
-5. mostre:
+1. abra `/` e selecione `dataset demo` na home
+2. siga para `/eda` para contextualizar o corpus
+3. abra `/baseline` e treine os artefatos
+4. abra `/predict`
+5. cole um novo texto
+6. mostre:
    - texto processado
    - macro prevista
    - confianca
@@ -273,8 +297,8 @@ secret.env           Variaveis locais do ambiente
 
 ### Caminho 2. Fluxo real com upload
 
-1. abra `/upload`
-2. envie um CSV valido
+1. abra `/`
+2. envie um CSV valido pela area de ingestao da home ou pela rota `/upload`
 3. navegue para `/eda`
 4. treine em `/baseline`
 5. realize inferencia em `/predict`

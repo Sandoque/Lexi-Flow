@@ -243,7 +243,7 @@ def test_genai_demo_route_classifies_text_in_mock_mode(tmp_path: Path):
 
     assert response.status_code == 200
     assert b"Sugestao do LLM" in response.data
-    assert b"Boleto" in response.data
+    assert b"Segunda via de boleto" in response.data
     assert b"mock" in response.data
 
 

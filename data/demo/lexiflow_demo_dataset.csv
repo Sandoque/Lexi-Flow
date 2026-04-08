@@ -1,13 +1,37 @@
 id_registro,texto,canal_origem,data,classe_macro,classe_detalhada
-1,Erro no login do portal do cliente,email,2026-03-01,Suporte,Login
-2,Preciso redefinir minha senha porque nao consigo entrar,chat,2026-03-02,Suporte,Senha
-3,Nao consigo anexar o documento solicitado na plataforma,portal,2026-03-03,Suporte,Anexo
-4,Quero a segunda via do boleto deste mes,email,2026-03-04,Financeiro,Boleto
-5,Existe uma cobranca em aberto que nao reconheco,telefone,2026-03-05,Financeiro,Cobranca
-6,Pagamento realizado ainda nao apareceu no sistema,whatsapp,2026-03-06,Financeiro,Pagamento
-7,Preciso atualizar meus dados cadastrais,portal,2026-03-07,Cadastro,Atualizacao
-8,Quero alterar o endereco registrado no cadastro,chat,2026-03-08,Cadastro,Endereco
-9,Meu acesso foi bloqueado apos varias tentativas de login,email,2026-03-09,Suporte,Login
-10,Esqueci a senha e preciso recuperar com urgencia,chat,2026-03-10,Suporte,Senha
-11,Podem enviar novamente o boleto vencido para pagamento hoje,email,2026-03-11,Financeiro,Boleto
-12,Preciso corrigir meu telefone e email no cadastro,portal,2026-03-12,Cadastro,Contato
+1,Nao consigo acessar o portal do cliente para abrir chamado,email,2026-03-01,Suporte tecnico,Acesso ao portal
+2,O portal da XPTO pede login mas nao entra mesmo com usuario correto,chat,2026-03-02,Suporte tecnico,Acesso ao portal
+3,Meu usuario interno foi bloqueado e preciso voltar ao portal hoje,portal,2026-03-03,Suporte tecnico,Acesso ao portal
+4,Preciso redefinir a senha porque a conta expirou e nao consigo continuar,chat,2026-03-04,Suporte tecnico,Recuperacao de senha
+5,Esqueci minha senha do ambiente interno e preciso recuperar o acesso,portal,2026-03-05,Suporte tecnico,Recuperacao de senha
+6,A senha do cliente venceu e o time precisa liberar uma nova credencial,email,2026-03-06,Suporte tecnico,Recuperacao de senha
+7,Nao consigo anexar o comprovante solicitado no cadastro do cliente,portal,2026-03-07,Suporte tecnico,Envio de documentos
+8,O upload do documento trava sempre que tento finalizar a solicitacao,whatsapp,2026-03-08,Suporte tecnico,Envio de documentos
+9,O parceiro nao consegue enviar os arquivos obrigatorios no portal,telefone,2026-03-09,Suporte tecnico,Envio de documentos
+10,Preciso da segunda via do boleto do contrato deste mes,email,2026-03-10,Financeiro,Segunda via de boleto
+11,Cliente pediu o boleto atualizado para pagamento ainda hoje,telefone,2026-03-11,Financeiro,Segunda via de boleto
+12,Podem reenviar a fatura para que o cliente regularize o servico,whatsapp,2026-03-12,Financeiro,Segunda via de boleto
+13,O pagamento foi realizado ontem mas continua pendente no sistema,whatsapp,2026-03-13,Financeiro,Pagamento nao identificado
+14,Transferi o valor mas a plataforma ainda mostra debito em aberto,email,2026-03-14,Financeiro,Pagamento nao identificado
+15,O cliente anexou comprovante e ainda nao houve baixa financeira,portal,2026-03-15,Financeiro,Pagamento nao identificado
+16,Existe uma cobranca que o cliente contestou e precisa de analise,atendimento_interno,2026-03-16,Financeiro,Cobranca contestada
+17,Recebi reclamacao sobre valor cobrado indevidamente na renovacao,telefone,2026-03-17,Financeiro,Cobranca contestada
+18,O contrato veio com cobranca duplicada e o cliente pediu revisao,email,2026-03-18,Financeiro,Cobranca contestada
+19,O motorista informou falha na coleta e o pedido nao saiu para entrega,operacoes,2026-03-19,Operacao,Falha operacional
+20,O sistema registrou erro na separacao do pedido e travou a esteira,atendimento_interno,2026-03-20,Operacao,Falha operacional
+21,A equipe operacional reportou problema na roteirizacao de entregas,operacoes,2026-03-21,Operacao,Falha operacional
+22,Cliente relata atraso no atendimento e nao recebeu retorno do time,chat,2026-03-22,Operacao,Atraso de atendimento
+23,A solicitacao ficou sem resposta desde ontem e precisa de retorno operacional,email,2026-03-23,Operacao,Atraso de atendimento
+24,O parceiro esta aguardando retorno ha horas e o caso segue parado,telefone,2026-03-24,Operacao,Atraso de atendimento
+25,A integracao com o parceiro caiu e os pedidos nao atualizaram status,atendimento_interno,2026-03-25,Operacao,Instabilidade de integracao
+26,Os eventos do parceiro nao chegaram e o painel esta desatualizado,operacoes,2026-03-26,Operacao,Instabilidade de integracao
+27,A sincronizacao com o sistema externo falhou e o estoque nao atualizou,atendimento_interno,2026-03-27,Operacao,Instabilidade de integracao
+28,O cliente esta insatisfeito com a demora e quer registrar reclamacao,whatsapp,2026-03-28,Experiencia do cliente,Reclamacao de servico
+29,Recebemos feedback negativo sobre a qualidade do atendimento no chat,chat,2026-03-29,Experiencia do cliente,Reclamacao de servico
+30,O cliente relatou experiencia ruim com o suporte e quer posicionamento,email,2026-03-30,Experiencia do cliente,Reclamacao de servico
+31,O cliente elogiou a resolucao rapida do time e pediu registro,formulario,2026-03-31,Experiencia do cliente,Feedback positivo
+32,Recebemos retorno positivo sobre a clareza do suporte prestado,email,2026-04-01,Experiencia do cliente,Feedback positivo
+33,O gestor do cliente enviou elogio pela agilidade no atendimento,whatsapp,2026-04-02,Experiencia do cliente,Feedback positivo
+34,Cliente pediu contato comercial para entender um servico adicional,portal,2026-04-03,Experiencia do cliente,Solicitacao comercial
+35,Chegou pedido para apresentacao de proposta de automacao para a operacao,telefone,2026-04-04,Experiencia do cliente,Solicitacao comercial
+36,O cliente quer saber valores e escopo de um novo modulo de analytics,email,2026-04-05,Experiencia do cliente,Solicitacao comercial

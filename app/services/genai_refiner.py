@@ -389,19 +389,24 @@ def get_demo_macro_options(artifacts_folder: str | None = None) -> list[dict]:
 
     return [
         {
-            "macro_class": "Suporte",
-            "detail_options": ["Login", "Senha", "Anexo", "Acesso"],
-            "detail_count": 4,
+            "macro_class": "Suporte tecnico",
+            "detail_options": ["Acesso ao portal", "Recuperacao de senha", "Envio de documentos"],
+            "detail_count": 3,
         },
         {
             "macro_class": "Financeiro",
-            "detail_options": ["Boleto", "Cobranca", "Pagamento", "Reembolso"],
-            "detail_count": 4,
+            "detail_options": ["Segunda via de boleto", "Pagamento nao identificado", "Cobranca contestada"],
+            "detail_count": 3,
         },
         {
-            "macro_class": "Cadastro",
-            "detail_options": ["Atualizacao", "Endereco", "Dados pessoais", "Contato"],
-            "detail_count": 4,
+            "macro_class": "Operacao",
+            "detail_options": ["Falha operacional", "Atraso de atendimento", "Instabilidade de integracao"],
+            "detail_count": 3,
+        },
+        {
+            "macro_class": "Experiencia do cliente",
+            "detail_options": ["Reclamacao de servico", "Feedback positivo", "Solicitacao comercial"],
+            "detail_count": 3,
         },
     ]
 
@@ -410,27 +415,35 @@ def get_demo_few_shot_examples() -> list[FewShotExample]:
     """Retorna exemplos simples para few-shot prompting na demonstracao."""
     return [
         FewShotExample(
-            text="Nao consigo acessar a conta porque a senha expirou.",
-            macro_class="Suporte",
-            detailed_class="Senha",
-            justification="O texto aponta diretamente para recuperacao ou expiracao de senha.",
+            text="Nao consigo acessar o portal do cliente porque a conta foi bloqueada e preciso voltar hoje.",
+            macro_class="Suporte tecnico",
+            detailed_class="Acesso ao portal",
+            justification="O texto descreve indisponibilidade de acesso ao portal e nao um problema financeiro ou operacional.",
             priority="alta",
             ambiguous=False,
         ),
         FewShotExample(
-            text="Preciso emitir a segunda via do boleto vencido.",
+            text="Preciso emitir a segunda via do boleto vencido para regularizar o contrato.",
             macro_class="Financeiro",
-            detailed_class="Boleto",
-            justification="A mencao explicita a segunda via de boleto dentro da macro financeira.",
+            detailed_class="Segunda via de boleto",
+            justification="A mencao explicita a necessidade de boleto atualizado dentro da macro financeira.",
             priority="media",
             ambiguous=False,
         ),
         FewShotExample(
-            text="Quero alterar meu endereco cadastrado no sistema.",
-            macro_class="Cadastro",
-            detailed_class="Endereco",
-            justification="O pedido trata de atualizacao cadastral especificamente ligada a endereco.",
-            priority="baixa",
+            text="A integracao com o parceiro caiu e o status dos pedidos nao atualiza.",
+            macro_class="Operacao",
+            detailed_class="Instabilidade de integracao",
+            justification="O problema esta em sincronizacao entre sistemas, com impacto operacional direto.",
+            priority="alta",
+            ambiguous=False,
+        ),
+        FewShotExample(
+            text="Recebemos feedback negativo sobre o atendimento e o cliente pediu retorno da lideranca.",
+            macro_class="Experiencia do cliente",
+            detailed_class="Reclamacao de servico",
+            justification="O caso trata de insatisfacao com o servico prestado e pede tratativa da experiencia.",
+            priority="media",
             ambiguous=False,
         ),
     ]
@@ -492,18 +505,18 @@ def choose_mock_class(text: str, valid_classes: list[str]) -> str:
     normalized_options = {option.lower(): option for option in valid_classes}
 
     keyword_map = {
-        "login": ["login", "acesso", "entrar", "autenticação", "autenticacao"],
-        "senha": ["senha", "reset", "recuperar", "expirada"],
-        "anexo": ["anexo", "arquivo", "documento", "upload"],
-        "acesso": ["acesso", "conta", "perfil", "permissão", "permissao"],
-        "boleto": ["boleto", "segunda via", "2 via"],
-        "cobranca": ["cobrança", "cobranca", "fatura", "debito"],
-        "pagamento": ["pagamento", "pagar", "quitado"],
-        "reembolso": ["reembolso", "estorno", "devolução", "devolucao"],
-        "atualizacao": ["atualizar", "atualização", "atualizacao", "cadastro"],
-        "endereco": ["endereço", "endereco", "logradouro", "cep"],
-        "dados pessoais": ["cpf", "nome", "dados pessoais", "data de nascimento"],
-        "contato": ["telefone", "email", "contato", "celular"],
+        "acesso ao portal": ["portal", "login", "acesso", "entrar", "bloqueada", "bloqueado"],
+        "recuperacao de senha": ["senha", "reset", "redefinir", "recuperar", "expirada"],
+        "envio de documentos": ["anexo", "arquivo", "documento", "upload", "comprovante"],
+        "segunda via de boleto": ["boleto", "segunda via", "2 via", "fatura"],
+        "pagamento nao identificado": ["pagamento", "nao apareceu", "nao baixou", "pendente", "baixa"],
+        "cobranca contestada": ["cobranca", "contestou", "contestada", "indevida", "duplicada"],
+        "falha operacional": ["falha", "erro", "travou", "coleta", "roteirizacao"],
+        "atraso de atendimento": ["atraso", "sem resposta", "retorno", "demora", "parado"],
+        "instabilidade de integracao": ["integracao", "parceiro", "eventos", "sincronizacao", "status"],
+        "reclamacao de servico": ["reclamacao", "insatisfeito", "negativo", "experiencia ruim", "posicionamento"],
+        "feedback positivo": ["elogio", "elogiou", "positivo", "satisfeito", "agilidade"],
+        "solicitacao comercial": ["comercial", "proposta", "novo modulo", "servico adicional", "valores"],
     }
 
     for option_lower, original in normalized_options.items():
