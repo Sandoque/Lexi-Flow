@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}{{ app_name }} | Inicio{% endblock %}
+{% block title %}{{ app_name }} | Início{% endblock %}
 
 {% block content %}
 <section class="hero-panel">
@@ -9,29 +9,29 @@
         <h1>{{ app_name }}</h1>
         <p class="hero-panel__subtitle">{{ app_subtitle }}</p>
         <p class="hero-panel__description">
-            Solucao criada para o case da XPTO Data Solutions, empresa que recebe diariamente chamados de suporte,
-            solicitacoes de clientes, relatos operacionais e feedbacks textuais sem categorizacao automatica.
+            Solução criada para o case da XPTO Data Solutions, empresa que recebe diariamente chamados de suporte,
+            solicitações de clientes, relatos operacionais e feedbacks textuais sem categorização automática.
         </p>
         <div class="hero-panel__actions">
-            <a class="button button-primary" href="#ingestao">Iniciar pela ingestao</a>
+            <a class="button button-primary" href="#ingestao">Iniciar pela ingestão</a>
             <a class="button button-secondary" href="#contexto-xpto">Entender o problema</a>
         </div>
     </div>
     <aside class="hero-panel__highlight">
-        <p class="highlight-label">Leitura da demonstracao</p>
+        <p class="highlight-label">Leitura da demonstração</p>
         <strong>Jornada sequencial do case</strong>
-        <span>Comece pela ingestao, avance para a leitura exploratoria e siga ate a classificacao assistida com foco em triagem e priorizacao.</span>
+        <span>Comece pela ingestão, avance para a leitura exploratória e siga até a classificação assistida com foco em triagem e priorização.</span>
     </aside>
 </section>
 
 <section id="contexto-xpto" class="section-heading">
     <div>
-        <p class="eyebrow">Contexto do negocio</p>
+        <p class="eyebrow">Contexto do negócio</p>
         <h2>O problema que a XPTO quer resolver</h2>
     </div>
     <p>
-        A empresa atua com solucoes de dados, automacao e IA para clientes de logistica, servicos financeiros
-        e varejo digital. O gargalo atual esta na leitura manual de textos que chegam por multiplos canais.
+        A empresa atua com soluções de dados, automação e IA para clientes de logística, serviços financeiros
+        e varejo digital. O gargalo atual está na leitura manual de textos que chegam por múltiplos canais.
     </p>
 </section>
 
@@ -46,43 +46,43 @@
 
 <section class="section-heading">
     <div>
-        <p class="eyebrow">Camadas da solucao</p>
+        <p class="eyebrow">Camadas da solução</p>
         <h2>Fluxo pensado para crescer com o case</h2>
     </div>
     <p>
-        A estrutura atual organiza responsabilidades tecnicas desde a entrada do dado ate a operacao assistida,
-        facilitando testes, manutencao e futura integracao com modelos e observabilidade.
+        A estrutura atual organiza responsabilidades técnicas desde a entrada do dado até a operação assistida,
+        facilitando testes, manutenção e futura integração com modelos e observabilidade.
     </p>
 </section>
 
 <section id="ingestao" class="panel dataset-mode-panel">
     <div>
         <p class="eyebrow">Etapa 01</p>
-        <h2>Ingestao inicial do dataset</h2>
+        <h2>Ingestão inicial do dataset</h2>
         <p>
             {% if using_demo_dataset %}
-                A home esta priorizando o dataset demo para acelerar a demonstracao, mas voce pode alternar para o ultimo upload.
+                A home está priorizando o dataset demo para acelerar a demonstração, mas você pode alternar para o último upload.
             {% else %}
-                A home esta apontando para o ultimo upload da sessao. Se preferir, alterne para o dataset demo antes de seguir.
+                A home está apontando para o último upload da sessão. Se preferir, alterne para o dataset demo antes de seguir.
             {% endif %}
         </p>
     </div>
     <div class="action-row">
-        <a class="button {% if not using_demo_dataset %}button-primary{% else %}button-secondary{% endif %}" href="{{ url_for('main.index', dataset_source='upload') }}">Usar ultimo upload</a>
+        <a class="button {% if not using_demo_dataset %}button-primary{% else %}button-secondary{% endif %}" href="{{ url_for('main.index', dataset_source='upload') }}">Usar último upload</a>
         <a class="button {% if using_demo_dataset %}button-primary{% else %}button-secondary{% endif %}" href="{{ url_for('main.index', dataset_source='demo') }}">Usar dataset demo</a>
     </div>
 </section>
 
 <section class="panel panel-upload">
     <div>
-        <p class="eyebrow">Upload no inicio</p>
+        <p class="eyebrow">Upload no início</p>
         <h2>Comece o fluxo pela entrada do CSV</h2>
         <p>
-            O arquivo enviado sera validado, salvo em <code>data/raw/</code> e usado como base para a leitura exploratoria,
-            para o treino baseline e para a demonstracao ponta a ponta.
+            O arquivo enviado será validado, salvo em <code>data/raw/</code> e usado como base para a leitura exploratória,
+            para o treino baseline e para a demonstração ponta a ponta.
         </p>
         <div class="expected-columns">
-            <h3>Colunas obrigatorias</h3>
+            <h3>Colunas obrigatórias</h3>
             <ul class="tag-list">
                 {% for column in expected_columns %}
                     <li>{{ column }}</li>
@@ -119,11 +119,11 @@
 <section class="section-heading">
     <div>
         <p class="eyebrow">Impacto esperado</p>
-        <h2>Valor direto para a operacao</h2>
+        <h2>Valor direto para a operação</h2>
     </div>
     <p>
-        A proposta nao e apenas classificar textos. Ela busca transformar triagem textual em um fluxo
-        de dados mais rapido, mais mensuravel e mais util para a tomada de decisao.
+        A proposta não é apenas classificar textos. Ela busca transformar triagem textual em um fluxo
+        de dados mais rápido, mais mensurável e mais útil para a tomada de decisão.
     </p>
 </section>
 
@@ -138,13 +138,13 @@
 
 <section class="info-strip">
     <div>
-        <p class="eyebrow">Sequencia oficial da demo</p>
-        <h2>Entrada, entendimento, modelagem e decisao operacional</h2>
+        <p class="eyebrow">Sequência oficial da demo</p>
+        <h2>Entrada, entendimento, modelagem e decisão operacional</h2>
     </div>
     <div class="action-row">
         <a class="button button-secondary" href="{{ url_for('pipeline.eda', dataset_source=dataset_source) }}">2. Abrir EDA</a>
         <a class="button button-primary" href="{{ url_for('pipeline.baseline', dataset_source=dataset_source) }}">3. Treinar baseline</a>
-        <a class="button button-secondary" href="{{ url_for('pipeline.predict', dataset_source=dataset_source) }}">4. Abrir predicao</a>
+        <a class="button button-secondary" href="{{ url_for('pipeline.predict', dataset_source=dataset_source) }}">4. Abrir predição</a>
         <a class="button button-secondary" href="{{ url_for('pipeline.genai_demo') }}">5. Ver GenAI Demo</a>
     </div>
 </section>

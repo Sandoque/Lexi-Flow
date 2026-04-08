@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="LexiFlow e uma plataforma Flask para classificacao textual com NLP e IA generativa.">
+    <meta name="description" content="LexiFlow é uma plataforma Flask para classificação textual com NLP e IA generativa.">
     <title>{% block title %}{{ app_name }}{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     {% block head %}{% endblock %}
@@ -20,10 +20,10 @@
                     </span>
                 </a>
                 <nav class="nav">
-                    <a class="nav__link {% if request.endpoint == 'main.index' %}nav__link--active{% endif %}" href="{{ url_for('main.index') }}">Inicio</a>
+                    <a class="nav__link {% if request.endpoint == 'main.index' %}nav__link--active{% endif %}" href="{{ url_for('main.index') }}">Início</a>
                     <a class="nav__link {% if request.endpoint == 'pipeline.eda' %}nav__link--active{% endif %}" href="{{ url_for('pipeline.eda', dataset_source=session.get('dataset_source')) }}">EDA</a>
                     <a class="nav__link {% if request.endpoint == 'pipeline.baseline' %}nav__link--active{% endif %}" href="{{ url_for('pipeline.baseline') }}">Baseline</a>
-                    <a class="nav__link {% if request.endpoint == 'pipeline.predict' %}nav__link--active{% endif %}" href="{{ url_for('pipeline.predict') }}">Predicao</a>
+                    <a class="nav__link {% if request.endpoint == 'pipeline.predict' %}nav__link--active{% endif %}" href="{{ url_for('pipeline.predict') }}">Predição</a>
                     <a class="nav__link {% if request.endpoint == 'pipeline.genai_demo' %}nav__link--active{% endif %}" href="{{ url_for('pipeline.genai_demo') }}">GenAI Demo</a>
                     <a class="nav__link {% if request.endpoint == 'main.architecture' %}nav__link--active{% endif %}" href="{{ url_for('main.architecture') }}">Arquitetura</a>
                 </nav>
@@ -42,7 +42,7 @@
             {% if session.get('dataset_source') == 'demo' %}
                 <section class="app-banner">
                     <strong>Modo demo ativo</strong>
-                    <p>A aplicacao esta priorizando o dataset demo para manter a apresentacao estavel e previsivel.</p>
+                    <p>A aplicação está priorizando o dataset demo para manter a apresentação estável e previsível.</p>
                 </section>
             {% endif %}
             {% with messages = get_flashed_messages(with_categories=true) %}
@@ -69,8 +69,8 @@
 
     <footer class="site-footer">
         <div class="container site-footer__content">
-            <p>{{ app_name }} organiza ingestao, classificacao e revisao assistida para casos de NLP aplicado.</p>
-            <span id="footer-status">Aplicacao pronta para evolucao incremental.</span>
+            <p>{{ app_name }} organiza ingestão, classificação e revisão assistida para casos de NLP aplicado.</p>
+            <span id="footer-status">Aplicação pronta para evolução incremental.</span>
         </div>
     </footer>
 

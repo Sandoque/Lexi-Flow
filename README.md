@@ -1,119 +1,119 @@
 # LexiFlow
 
-Plataforma de Classificacao Textual Inteligente.
+Plataforma de Classificação Textual Inteligente.
 
-## Visao Geral
+## Visão Geral
 
-LexiFlow e uma aplicacao Flask com arquitetura profissional para o case da XPTO Data Solutions, empresa que recebe diariamente textos de suporte, solicitacoes de clientes, relatos operacionais e feedbacks textuais sem categorizacao automatica. O projeto combina:
+LexiFlow é uma aplicação Flask estruturada como um case de Dados e IA Generativa para a XPTO Data Solutions. O projeto parte de um problema operacional real: a empresa recebe diariamente textos de suporte, solicitações de clientes, relatos operacionais e feedbacks textuais sem categorização automática.
 
-- pipeline supervisionado baseline para classificacao hierarquica
-- camada complementar de IA generativa para refinamento explicavel
-- experiencia web orientada a produto
-- decisao operacional assistida com base em confianca
+A solução foi desenhada para ir além de um classificador isolado. O fluxo combina:
 
-O objetivo nao e apenas classificar texto, mas transformar a triagem textual da XPTO em uma solucao demonstravel de ponta a ponta, com separacao clara entre ingestao, analise, modelagem, refinamento e operacao.
+- ingestão controlada de dados
+- análise exploratória do corpus
+- pré-processamento NLP reutilizável
+- baseline supervisionado hierárquico
+- refinamento complementar com IA generativa
+- recomendação operacional assistida por confiança
 
-## Problema de Negocio
+O objetivo não é apenas prever classes, mas transformar a triagem textual em um fluxo demonstrável de ponta a ponta, com narrativa clara de produto, explicabilidade e evolução futura.
 
-A XPTO Data Solutions atende clientes de logistica, servicos financeiros e varejo digital. No dia a dia, isso se traduz em registros textuais vindos de multiplos canais, como:
+## Problema de Negócio
 
-- descricoes de chamados de suporte
-- solicitacoes de clientes
+A XPTO Data Solutions atua com soluções de dados, automação e inteligência artificial para empresas de médio porte em setores como logística, serviços financeiros e varejo digital.
+
+No contexto do case, a empresa recebe registros textuais vindos de múltiplos canais, como:
+
+- descrições de chamados de suporte
+- solicitações de clientes
 - relatos operacionais
-- feedbacks textuais sobre servicos
+- feedbacks textuais sobre serviços
 
-Sem categorizacao automatica, esse fluxo gera dores operacionais claras:
+Sem categorização automática, esse fluxo gera dores operacionais relevantes:
 
-- dificuldade de priorizacao
-- alto tempo de resposta
-- falta de metricas por tipo de problema
-- dependencia excessiva de leitura manual
+- dificuldade de priorização
+- aumento do tempo de resposta
+- pouca visibilidade por tipo de problema
+- dependência excessiva de leitura manual
 
-O desafio do case e estruturar uma solucao que:
+A proposta do LexiFlow é responder a esse cenário com uma solução técnica viável, explicável e preparada para crescer.
 
-- receba dados textuais de forma controlada
-- compreenda o corpus com EDA
-- realize classificacao supervisionada confiavel
-- use IA generativa com criterio, e nao como substituta cega do baseline
-- apoie a operacao com roteamento assistido e explicabilidade
+## Proposta da Solução
 
-## Proposta da Solucao
+O LexiFlow organiza o problema em camadas:
 
-LexiFlow implementa um fluxo em camadas:
+1. ingestão do CSV com validação estrutural
+2. análise exploratória do dataset
+3. pré-processamento textual com NLP
+4. classificação baseline hierárquica
+5. refinamento da classe detalhada com IA generativa
+6. inferência ponta a ponta em interface web
+7. operação assistida baseada em confiança
 
-1. ingestao do CSV com validacao estrutural
-2. analise exploratoria do dataset
-3. pre-processamento NLP reutilizavel
-4. baseline supervisionado hierarquico
-5. refinamento de `classe_detalhada` com GenAI
-6. inferencia ponta a ponta em interface web
-7. operacao assistida baseada em confianca
-
-O projeto foi pensado para demonstrar maturidade tecnica e narrativa de produto ao mesmo tempo.
+Essa abordagem equilibra baseline supervisionado e GenAI com critério. O baseline continua sendo a referência principal de classificação, enquanto a camada generativa entra como refinamento contextual, explicabilidade e apoio operacional.
 
 ## Impacto Esperado
 
-Mais do que prever classes, a solucao foi pensada para apoiar a operacao da XPTO com resultados claros:
+Mais do que prever classes, a solução foi pensada para apoiar a operação da XPTO com resultados claros:
 
-- priorizacao mais rapida de casos criticos
-- reducao da triagem manual repetitiva
+- priorização mais rápida de casos críticos
+- redução da triagem manual repetitiva
 - visibilidade por tipo de problema e canal de origem
-- apoio a decisao para filas, SLA e revisao humana
+- apoio à decisão para filas, SLA e revisão humana
 
 ## Arquitetura em Camadas
 
-### 1. Ingestao de Dados
+### 1. Ingestão de Dados
 
 - upload de CSV
-- validacao de extensao e colunas obrigatorias
-- persistencia em `data/raw/`
-- suporte a dataset demo para apresentacoes
+- validação de extensão e colunas obrigatórias
+- persistência em `data/raw/`
+- suporte a dataset demo para apresentações
 
-### 2. Analise Exploratoria
+### 2. Análise Exploratória
 
 - contagem de registros
-- distribuicao de `classe_macro`, `classe_detalhada` e `canal_origem`
-- metricas textuais basicas
-- visualizacoes geradas em memoria
+- distribuição de `classe_macro`, `classe_detalhada` e `canal_origem`
+- métricas textuais básicas
+- visualizações simples para leitura executiva e técnica
 
-### 3. Pre-processamento NLP
+### 3. Pré-processamento NLP
 
-- normalizacao textual
-- limpeza de espacos
+- normalização textual
+- limpeza de espaços
 - lowercase
-- remocao opcional de pontuacao
-- remocao opcional de stopwords
-- lematizacao opcional
-- fallback seguro se o modelo spaCy nao estiver disponivel
+- remoção opcional de pontuação
+- remoção opcional de stopwords
+- lematização opcional
+- fallback seguro se o modelo spaCy não estiver disponível
 
-### 4. Classificacao Baseline Hierarquica
+### 4. Classificação Baseline Hierárquica
 
 - `TF-IDF + Logistic Regression`
-- nivel 1: previsao de `classe_macro`
-- nivel 2: previsao de `classe_detalhada` condicionada pela macro prevista
-- persistencia de artefatos com `joblib`
+- nível 1: previsão de `classe_macro`
+- nível 2: previsão de `classe_detalhada` condicionada pela macro prevista
+- persistência de artefatos com `joblib`
 
 ### 5. Refinamento com IA Generativa
 
-- provider configuravel
+- provider configurável
 - suporte a `mock` e `groq`
 - prompt estruturado
 - fallback seguro para mock
-- few-shot contextual com casos similares recuperados do historico
+- few-shot contextual com casos similares recuperados do histórico
 
-### 6. Operacao Assistida
+### 6. Operação Assistida
 
-- leitura da confianca do baseline
-- decisao operacional em tres niveis:
-  - classificacao automatica
-  - classificacao assistida
-  - revisao humana
-- camada preparada para futuro feedback loop humano
+- leitura da confiança do baseline
+- decisão operacional em três níveis:
+  - classificação automática
+  - classificação assistida
+  - revisão humana
+- estrutura preparada para futuro feedback humano
 
-### 7. Evolucoes Futuras
+### 7. Evoluções Futuras
 
-- embeddings reais
-- retrieval com banco vetorial
+- embeddings semânticos reais
+- recuperação com banco vetorial
 - descoberta de novas classes
 - monitoramento de drift
 - aprendizagem com feedback humano
@@ -137,28 +137,28 @@ Mais do que prever classes, a solucao foi pensada para apoiar a operacao da XPTO
 
 - cliente OpenAI-compatible
 - Groq
-- modo mock para demonstracao sem custo
+- modo mock para demonstração sem custo
 
-### Visualizacao e apoio
+### Visualização e apoio
 
 - matplotlib
-- HTML/CSS/JS leve
+- HTML, CSS e JavaScript leve
 
 ### Qualidade
 
 - pytest
 
-## Configuracao com `secret.env`
+## Configuração com `secret.env`
 
-A configuracao principal do projeto fica em `config.py`, com suporte a leitura explicita de `secret.env`.
+A configuração principal do projeto fica em `config.py`, com suporte explícito a `secret.env`.
 
-Ordem de precedencia:
+Ordem de precedência:
 
-1. variaveis do sistema
+1. variáveis do sistema
 2. `secret.env`
-3. defaults seguros de desenvolvimento
+3. defaults seguros para desenvolvimento
 
-Exemplo de configuracao:
+Exemplo:
 
 ```env
 FLASK_ENV=development
@@ -182,7 +182,7 @@ GROQ_API_KEY=
 
 ## Uso com Mock
 
-Modo recomendado para desenvolvimento local e apresentacoes sem dependencia de API externa.
+Modo recomendado para desenvolvimento local e apresentações sem depender de API externa.
 
 ```env
 GENAI_PROVIDER=mock
@@ -191,13 +191,13 @@ GENAI_MOCK_MODE=true
 
 Nesse modo:
 
-- nenhuma chave e necessaria
+- nenhuma chave é necessária
 - a interface continua funcional
-- a GenAI gera respostas estruturadas para demonstracao
+- a camada GenAI retorna respostas estruturadas para demonstração
 
 ## Uso com Groq
 
-LexiFlow suporta Groq via API OpenAI-compatible.
+O LexiFlow suporta Groq por meio de API OpenAI-compatible.
 
 Exemplo:
 
@@ -214,8 +214,8 @@ GENAI_MOCK_MODE=false
 
 Regras implementadas:
 
-- se `GENAI_PROVIDER=groq` e `GENAI_API_KEY` estiver vazio, a aplicacao tenta `GROQ_API_KEY`
-- se a autenticacao falhar, a mensagem de erro e amigavel
+- se `GENAI_PROVIDER=groq` e `GENAI_API_KEY` estiver vazio, a aplicação tenta `GROQ_API_KEY`
+- se a autenticação falhar, a mensagem é amigável
 - se ocorrer timeout, erro de rede ou erro inesperado, a camada GenAI cai automaticamente para mock
 
 ## Como Rodar Localmente
@@ -226,7 +226,7 @@ Regras implementadas:
 .\.venv\Scripts\Activate.ps1
 ```
 
-### 2. Instalar dependencias
+### 2. Instalar dependências
 
 ```powershell
 pip install -r requirements.txt
@@ -238,7 +238,7 @@ pip install -r requirements.txt
 python -m spacy download pt_core_news_sm
 ```
 
-### 4. Subir a aplicacao
+### 4. Subir a aplicação
 
 ```powershell
 python run.py
@@ -247,12 +247,16 @@ python run.py
 ### 5. Rotas principais
 
 - `/`
-- `/arquitetura`
-- `/upload`
 - `/eda`
 - `/baseline`
-- `/genai-demo`
 - `/predict`
+- `/genai-demo`
+- `/arquitetura`
+
+Rotas de apoio:
+
+- `/upload`
+- `/results`
 - `/health`
 
 ## Estrutura de Pastas
@@ -260,118 +264,126 @@ python run.py
 ```text
 app/
   routes/            Rotas Flask e blueprints
-  services/          Regras de negocio, NLP, baseline, GenAI e operacao
-  utils/             Utilitarios compartilhados
+  services/          Regras de negócio, NLP, baseline, GenAI e operação
+  utils/             Utilitários compartilhados
   templates/         Templates Jinja
   static/            CSS e JS
 
 data/
   raw/               Uploads de entrada
-  processed/         Saidas intermediarias
+  processed/         Saídas intermediárias
   artifacts/         Modelos e metadados persistidos
-  demo/              Dataset demo para apresentacao
+  demo/              Dataset demo para apresentação
 
+notebooks/           Apêndice analítico do case
 tests/               Testes automatizados
-config.py            Configuracao central
+config.py            Configuração central
 run.py               Entry point local
-secret.env           Variaveis locais do ambiente
+secret.env           Variáveis locais do ambiente
 ```
 
 ## Fluxo de Uso
 
-### Caminho 1. Demonstracao com dataset demo
+### Caminho 1. Demonstração com dataset demo
 
-1. abra `/` e selecione `dataset demo` na home
-2. siga para `/eda` para contextualizar o corpus
-3. abra `/baseline` e treine os artefatos
-4. abra `/predict`
+1. abra `/` e mantenha o dataset demo como fonte
+2. avance para `/eda` para contextualizar o corpus
+3. treine o baseline em `/baseline`
+4. siga para `/predict`
 5. cole um novo texto
-6. mostre:
-   - texto processado
+6. apresente:
    - macro prevista
-   - confianca
+   - confiança
    - classe detalhada sugerida
-   - casos similares usados como apoio
    - provider usado
    - fluxo operacional recomendado
 
-### Caminho 2. Fluxo real com upload
+### Caminho 2. Fluxo com upload real
 
 1. abra `/`
-2. envie um CSV valido pela area de ingestao da home ou pela rota `/upload`
+2. envie um CSV válido na área de ingestão da home ou pela rota `/upload`
 3. navegue para `/eda`
 4. treine em `/baseline`
-5. realize inferencia em `/predict`
+5. execute a inferência em `/predict`
 
-## Decisoes Tecnicas
+## Decisões Técnicas
+
+### Defesa técnica resumida
+
+Se a solução precisar ser defendida de forma curta em entrevista, a lógica central é:
+
+- baseline supervisionado primeiro para garantir referência forte, explicável e reproduzível
+- hierarquia macro -> detalhada para refletir a taxonomia real do problema
+- GenAI depois do baseline para refinar, justificar e apoiar a operação sem substituir a classificação principal
 
 ### Flask com app factory e blueprints
 
-Permite organizacao por camadas, evolucao modular e estrutura mais profissional que um app monolitico simples.
+Permite organização por camadas, evolução modular e estrutura mais profissional do que um app monolítico simples.
 
 ### TF-IDF + Logistic Regression
 
-Escolha intencional para baseline:
+Escolha intencional para baseline porque:
 
-- forte para classificacao textual
-- rapido para treinar
-- reproduzivel
-- explicavel
-- adequado para features esparsas
+- é forte para classificação textual
+- treina rápido
+- é reproduzível
+- é explicável
+- funciona bem com features esparsas
 
 ### Hierarquia macro -> detalhada
 
-O problema real foi modelado em dois niveis para refletir a taxonomia de negocio e reduzir o espaco de erro da classe detalhada.
+O problema foi modelado em dois níveis para refletir a taxonomia de negócio e reduzir o espaço de erro da classe detalhada.
 
-### GenAI complementar, nao substitutiva
+### GenAI complementar, não substitutiva
 
-A camada generativa nao entra como classificador principal. Ela atua depois do baseline, com contexto controlado, classes permitidas e explicabilidade.
+A camada generativa não entra como classificador principal. Ela atua depois do baseline, com contexto controlado, classes válidas e justificativa curta.
 
 ### Few-shot contextual leve
 
-Em vez de infraestrutura pesada, o projeto usa recuperacao local de exemplos similares com `TF-IDF + cosseno`, suficiente para o case e facil de demonstrar.
+Em vez de depender de infraestrutura pesada, o projeto usa recuperação local de exemplos similares com `TF-IDF + cosseno`, suficiente para o case e fácil de demonstrar.
 
-### Operacao assistida
+### Operação assistida
 
-O resultado da classificacao nao para na predicao. O sistema converte confianca e ambiguidade em uma recomendacao operacional clara.
+O resultado da classificação não para na predição. O sistema converte confiança e ambiguidade em uma recomendação operacional clara.
 
-## Limitacoes
+## Limitações
 
-- baseline ainda depende da qualidade do dataset historico
-- a camada GenAI nao substitui uma validacao humana em casos ambiguos
-- a recuperacao de similares ainda usa TF-IDF, nao embeddings semanticos profundos
-- nao ha fila real de feedback humano persistido nesta versao
-- monitoramento de drift e descoberta de novas classes ainda sao evolucoes futuras
+- erros na macroclasse impactam diretamente o detalhamento
+- o baseline depende da qualidade do dataset histórico
+- classes com pouco volume tendem a ser mais sensíveis a confusão
+- a camada GenAI não substitui validação humana em casos ambíguos
+- a recuperação de similares ainda usa TF-IDF, não embeddings profundos
+- ainda não há feedback humano persistido nesta versão
+- monitoramento de drift e descoberta de novas classes permanecem como evolução futura
 
-## Proximos Passos
+## Próximos Passos
 
 - persistir feedback humano e override operacional
-- adicionar embeddings reais para retrieval semantico
-- usar banco vetorial quando o volume justificar
+- adicionar embeddings reais para retrieval semântico
+- incorporar banco vetorial quando o volume justificar
 - criar monitoramento de performance e drift
-- suportar inferencia em lote
-- adicionar dashboard de observabilidade do fluxo
+- suportar inferência em lote
+- adicionar observabilidade do fluxo
 
-## Por que esta solucao e aderente a vaga de Dados & IA Generativa
+## Apêndice Analítico
 
-Este projeto demonstra, de forma pratica, um conjunto de competencias diretamente aderentes a uma vaga de Dados e IA Generativa:
+O repositório inclui um apêndice leve em `notebooks/` para apoiar a conversa técnica sobre:
 
-- modelagem de problema de negocio em pipeline de dados
-- NLP aplicado com pre-processamento e classificacao supervisionada
-- avaliacao de baseline com metricas e persistencia de artefatos
-- integracao de LLM com provider configuravel
-- fallback seguro entre ambientes reais e mock
-- uso criterioso de GenAI como camada complementar
-- few-shot contextual com recuperacao de similares
-- visao de produto, interface operacional e experiencia demonstravel
+- leitura inicial do dataset
+- hipóteses de modelagem
+- justificativa do baseline
+- interpretação dos resultados
 
-Em outras palavras, LexiFlow nao e apenas um experimento tecnico. Ele mostra capacidade de desenhar uma solucao fim a fim, com equilibrio entre engenharia, IA e aplicacao de negocio.
+## Por Que Esta Solução É Aderente à Vaga de Dados & IA Generativa
 
-## Status do README
+Este projeto demonstra, de forma prática, competências diretamente aderentes a uma vaga de Dados e IA Generativa:
 
-Este README foi estruturado para:
+- entendimento de problema de negócio com tradução para solução analítica
+- EDA aplicada a dados textuais
+- NLP com pré-processamento reutilizável
+- classificação supervisionada com baseline defendível
+- avaliação de métricas e leitura crítica dos erros
+- integração pragmática de IA generativa em fluxo real
+- preocupação com operação assistida, explicabilidade e evolução
 
-- leitura limpa no GitHub
-- uso em entrevista tecnica
-- apoio direto em apresentacao de case
-- narrativa clara para perfis de Dados, ML, NLP e IA Generativa
+Em outras palavras, o LexiFlow não é apenas um experimento técnico. Ele mostra capacidade de estruturar uma solução fim a fim, equilibrando engenharia, modelagem, IA generativa e aplicação de negócio.

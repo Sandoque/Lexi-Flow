@@ -1,4 +1,4 @@
-"""Rotas relacionadas ao fluxo de classificacao textual."""
+"""Rotas relacionadas ao fluxo de classificação textual."""
 
 from flask import Blueprint, current_app, flash, redirect, render_template, request, session, url_for
 
@@ -32,7 +32,7 @@ pipeline_bp = Blueprint("pipeline", __name__)
 
 
 def obter_fonte_dataset_ativa() -> str:
-    """Resolve e persiste a fonte ativa de dados para a sessao atual."""
+    """Resolve e persiste a fonte ativa de dados para a sessão atual."""
     source = resolve_dataset_source(
         requested_source=request.values.get("dataset_source"),
         current_source=session.get("dataset_source"),
@@ -46,7 +46,7 @@ def montar_contexto_fonte_dataset(dataset_source: str) -> dict:
     """Monta contexto simples para indicar a fonte ativa na interface."""
     return {
         "dataset_source": dataset_source,
-        "dataset_source_label": "dataset demo" if dataset_source == "demo" else "ultimo upload",
+        "dataset_source_label": "dataset demo" if dataset_source == "demo" else "último upload",
         "using_demo_dataset": dataset_source == "demo",
         "demo_dataset_path": str(current_app.config["DEMO_DATASET_PATH"]),
     }
@@ -54,7 +54,7 @@ def montar_contexto_fonte_dataset(dataset_source: str) -> dict:
 
 @pipeline_bp.route("/upload", methods=["GET", "POST"])
 def upload():
-    """Exibe a tela de upload e processa a ingestao do CSV."""
+    """Exibe a tela de upload e processa a ingestão do CSV."""
     dataset_source = obter_fonte_dataset_ativa()
     ingest_result = None
 
@@ -71,15 +71,15 @@ def upload():
             session["dataset_source"] = "upload"
             dataset_source = "upload"
             flash(
-                "Arquivo validado e salvo com sucesso em data/raw. Ele agora e a fonte ativa da sessao.",
+                "Arquivo validado e salvo com sucesso em data/raw. Ele agora é a fonte ativa da sessão.",
                 "success",
             )
         except IngestaoError as exc:
             flash(str(exc), "warning")
         except Exception:
-            current_app.logger.exception("Erro inesperado durante a ingestao do dataset.")
+            current_app.logger.exception("Erro inesperado durante a ingestão do dataset.")
             flash(
-                "Ocorreu um erro inesperado durante a ingestao. Tente novamente com outro arquivo.",
+                "Ocorreu um erro inesperado durante a ingestão. Tente novamente com outro arquivo.",
                 "danger",
             )
 
@@ -93,7 +93,7 @@ def upload():
 
 @pipeline_bp.get("/eda")
 def eda():
-    """Exibe a analise exploratoria do ultimo dataset disponivel."""
+    """Exibe a análise exploratória do último dataset disponível."""
     dataset_source = obter_fonte_dataset_ativa()
     try:
         eda_result = carregar_eda_do_ultimo_dataset(
@@ -109,11 +109,8 @@ def eda():
         flash(str(exc), "warning")
         return redirect(url_for("pipeline.upload"))
     except Exception:
-        current_app.logger.exception("Erro inesperado ao gerar a analise exploratoria.")
-        flash(
-            "Nao foi possivel montar a analise exploratoria do dataset.",
-            "danger",
-        )
+        current_app.logger.exception("Erro inesperado ao gerar a análise exploratória.")
+        flash("Não foi possível montar a análise exploratória do dataset.", "danger")
         return redirect(url_for("pipeline.upload"))
 
     return render_template(
@@ -125,7 +122,7 @@ def eda():
 
 @pipeline_bp.route("/baseline", methods=["GET"])
 def baseline():
-    """Treina e exibe o baseline hierarquico para o dataset ativo."""
+    """Treina e exibe o baseline hierárquico para o dataset ativo."""
     dataset_source = obter_fonte_dataset_ativa()
 
     try:
@@ -142,7 +139,7 @@ def baseline():
         return redirect(url_for("pipeline.upload"))
     except Exception:
         current_app.logger.exception("Erro inesperado durante o treinamento baseline.")
-        flash("Nao foi possivel treinar o baseline com o dataset atual.", "danger")
+        flash("Não foi possível treinar o baseline com o dataset atual.", "danger")
         return redirect(url_for("pipeline.upload"))
 
     return render_template(
@@ -154,7 +151,7 @@ def baseline():
 
 @pipeline_bp.route("/genai-demo", methods=["GET", "POST"])
 def genai_demo():
-    """Executa uma demonstracao da camada GenAI complementar ao baseline."""
+    """Executa uma demonstração da camada GenAI complementar ao baseline."""
     macro_options = get_demo_macro_options(current_app.config["ARTIFACTS_FOLDER"])
     selected_macro = request.form.get("macro_class", macro_options[0]["macro_class"] if macro_options else "")
     selected_entry = next(
@@ -175,14 +172,14 @@ def genai_demo():
                 few_shot_examples=get_demo_few_shot_examples(),
             )
             flash(
-                f"A camada GenAI retornou uma sugestao estruturada usando provider {genai_result['provider']}.",
+                f"A camada GenAI retornou uma sugestão estruturada usando provider {genai_result['provider']}.",
                 "success",
             )
         except GenAIRefinerError as exc:
             flash(str(exc), "warning")
         except Exception:
-            current_app.logger.exception("Erro inesperado durante a demonstracao GenAI.")
-            flash("Nao foi possivel executar a demonstracao GenAI.", "danger")
+            current_app.logger.exception("Erro inesperado durante a demonstração GenAI.")
+            flash("Não foi possível executar a demonstração GenAI.", "danger")
 
     return render_template(
         "genai_demo.html",
@@ -196,7 +193,7 @@ def genai_demo():
 
 @pipeline_bp.route("/predict", methods=["GET", "POST"])
 def predict():
-    """Executa a inferencia ponta a ponta com baseline e camada GenAI complementar."""
+    """Executa a inferência ponta a ponta com baseline e camada GenAI complementar."""
     dataset_source = obter_fonte_dataset_ativa()
     channel_options = obter_canais_origem_padrao()
     routing_legend = obter_legenda_fluxo_operacional()
@@ -217,26 +214,26 @@ def predict():
                 if prediction_result["genai"]["similar_examples_used"]:
                     flash(
                         (
-                            "Inferencia concluida com baseline, GenAI "
+                            "Inferência concluída com baseline, GenAI "
                             f"via {prediction_result['genai']['provider']} e apoio de casos similares."
                         ),
                         "success",
                     )
                 else:
                     flash(
-                        f"Inferencia concluida com baseline e GenAI via {prediction_result['genai']['provider']}.",
+                        f"Inferência concluída com baseline e GenAI via {prediction_result['genai']['provider']}.",
                         "success",
                     )
             else:
                 flash(
-                    "Inferencia concluida com baseline. A camada GenAI ficou indisponivel nesta execucao.",
+                    "Inferência concluída com baseline. A camada GenAI ficou indisponível nesta execução.",
                     "warning",
                 )
         except PredictionError as exc:
             flash(str(exc), "warning")
         except Exception:
-            current_app.logger.exception("Erro inesperado durante a inferencia ponta a ponta.")
-            flash("Nao foi possivel concluir a inferencia com o texto informado.", "danger")
+            current_app.logger.exception("Erro inesperado durante a inferência ponta a ponta.")
+            flash("Não foi possível concluir a inferência com o texto informado.", "danger")
 
     return render_template(
         "predict.html",
@@ -252,7 +249,7 @@ def predict():
 
 @pipeline_bp.get("/results")
 def results():
-    """Renderiza uma visao placeholder para as saidas do fluxo."""
+    """Renderiza uma visão placeholder para as saídas do fluxo."""
     context = {
         "validation_summary": get_validation_placeholder(),
         "eda_summary": get_eda_placeholder(),

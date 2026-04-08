@@ -8,15 +8,15 @@
         <p class="eyebrow">Camada complementar ao refinamento</p>
         <h1>GenAI Demo para refinamento detalhado</h1>
     </div>
-    <p>Playground controlado para mostrar o papel do provider sem competir com a tela principal de inferencia.</p>
+    <p>Playground controlado para mostrar o papel do provider sem competir com a tela principal de inferência.</p>
 </section>
 
 <section class="panel genai-layout">
     <div>
         <div class="table-header">
             <div>
-                <p class="eyebrow">Entrada da demonstracao</p>
-                <h2>Classificacao assistida</h2>
+                <p class="eyebrow">Entrada da demonstração</p>
+                <h2>Classificação assistida</h2>
             </div>
             <div class="status-badges">
                 <span class="state-pill {% if configured_genai_provider == 'mock' %}state-pill--warning{% else %}state-pill--info{% endif %}">
@@ -55,7 +55,7 @@
     </div>
 
     <aside class="panel panel-inner panel-subtle">
-        <p class="eyebrow">Escopo valido</p>
+        <p class="eyebrow">Escopo válido</p>
         <h2>Classes detalhadas permitidas</h2>
         <p>O refino fica restrito ao conjunto coerente com a macro selecionada.</p>
         <ul class="tag-list">
@@ -91,7 +91,7 @@
             <div class="table-header">
                 <div>
                     <p class="eyebrow">Resposta estruturada</p>
-                    <h2>Sugestao do LLM</h2>
+                    <h2>Sugestão do LLM</h2>
                 </div>
                 <div class="status-badges">
                     <span class="state-pill {% if genai_result.provider == 'groq' %}state-pill--success{% elif genai_result.provider == 'mock' %}state-pill--warning{% else %}state-pill--danger{% endif %}">
@@ -103,7 +103,7 @@
                 <li><span>Classe detalhada sugerida</span><strong>{{ genai_result.result.detailed_class }}</strong></li>
                 <li><span>Prioridade sugerida</span><strong>{{ genai_result.result.priority }}</strong></li>
                 <li><span>Justificativa</span><strong>{{ genai_result.result.justification }}</strong></li>
-                <li><span>Caso ambiguo</span><strong>{% if genai_result.result.ambiguous_case %}Sim{% else %}Nao{% endif %}</strong></li>
+                <li><span>Caso ambíguo</span><strong>{% if genai_result.result.ambiguous_case %}Sim{% else %}Não{% endif %}</strong></li>
             </ul>
         </article>
 
@@ -113,13 +113,13 @@
                     <p class="eyebrow">Fallback e modo</p>
                     <h2>Leitura operacional</h2>
                 </div>
-                <p>Visao curta para explicar o comportamento do provider.</p>
+                <p>Visão curta para explicar o comportamento do provider.</p>
             </div>
             <ul class="distribution-list">
                 <li><span>Provider solicitado</span><strong>{{ genai_result.requested_provider }}</strong></li>
                 <li><span>Provider efetivo</span><strong>{{ genai_result.provider }}</strong></li>
                 <li><span>Modo</span><strong>{{ genai_result.mode }}</strong></li>
-                <li><span>Origem da chave</span><strong>{{ genai_result.api_key_source or "nao aplicavel" }}</strong></li>
+                <li><span>Origem da chave</span><strong>{{ genai_result.api_key_source or "não aplicável" }}</strong></li>
             </ul>
             {% if genai_result.fallback_reason %}
                 <div class="predict-alert">

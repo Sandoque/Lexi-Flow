@@ -1,4 +1,4 @@
-"""Camada GenAI para refinamento de classe detalhada com provider configuravel."""
+"""Camada GenAI para refinamento de classe detalhada com provider configurável."""
 
 from __future__ import annotations
 
@@ -30,7 +30,7 @@ class FewShotExample:
 
 @dataclass(slots=True)
 class GenAISettings:
-    """Configuracoes operacionais da camada GenAI."""
+    """Configurações operacionais da camada GenAI."""
 
     requested_provider: str
     effective_provider: str
@@ -64,11 +64,11 @@ class GenAIRefiner:
     ) -> dict:
         """Executa o refinamento da classe detalhada com retorno estruturado."""
         if not text or not text.strip():
-            raise GenAIRefinerError("Informe um texto para classificacao.")
+            raise GenAIRefinerError("Informe um texto para classificação.")
         if not predicted_macro or not predicted_macro.strip():
             raise GenAIRefinerError("Informe a macroclasse prevista para o refinamento.")
         if not valid_detailed_classes:
-            raise GenAIRefinerError("Nao ha classes detalhadas validas para a macroclasse informada.")
+            raise GenAIRefinerError("Não há classes detalhadas válidas para a macroclasse informada.")
 
         prompt = build_structured_prompt(
             text=text,
@@ -93,7 +93,7 @@ class GenAIRefiner:
 
 
 class BaseGenAIProvider:
-    """Contrato minimo dos providers suportados pela camada GenAI."""
+    """Contrato mínimo dos providers suportados pela camada GenAI."""
 
     def __init__(self, settings: GenAISettings):
         self.settings = settings
@@ -107,7 +107,7 @@ class BaseGenAIProvider:
 
 
 class MockGenAIProvider(BaseGenAIProvider):
-    """Provider fake para demonstracao local e desenvolvimento sem custo."""
+    """Provider fake para demonstração local e desenvolvimento sem custo."""
 
     def generate_structured_completion(self, prompt: str) -> str:
         self.active_provider = "mock"
@@ -120,7 +120,7 @@ class MockGenAIProvider(BaseGenAIProvider):
         ambiguous = is_ambiguous_case(text, valid_classes)
         priority = infer_priority(text)
         justification = (
-            "Sugestao mock baseada em correspondencia lexical simples, pensada apenas para demonstracao operacional."
+            "Sugestão mock baseada em correspondência lexical simples, pensada apenas para demonstração operacional."
         )
 
         return json.dumps(
@@ -150,7 +150,7 @@ class OpenAICompatibleProvider(BaseGenAIProvider):
             from openai import OpenAI
             from openai import APIConnectionError, APITimeoutError, AuthenticationError
         except ImportError as exc:
-            raise GenAIRefinerError("O pacote openai nao esta disponivel no ambiente atual.") from exc
+            raise GenAIRefinerError("O pacote openai não está disponível no ambiente atual.") from exc
 
         client = OpenAI(
             api_key=self.settings.api_key,
@@ -165,8 +165,8 @@ class OpenAICompatibleProvider(BaseGenAIProvider):
                     {
                         "role": "system",
                         "content": (
-                            "Voce e um assistente de classificacao textual operacional. "
-                            "Responda somente com JSON valido."
+                            "Você é um assistente de classificação textual operacional. "
+                            "Responda somente com JSON válido."
                         ),
                     },
                     {"role": "user", "content": prompt},
@@ -175,11 +175,11 @@ class OpenAICompatibleProvider(BaseGenAIProvider):
             )
         except AuthenticationError as exc:
             logger.warning(
-                "Falha de autenticacao no provider '%s'.",
+                "Falha de autenticação no provider '%s'.",
                 self.settings.effective_provider,
             )
             raise GenAIRefinerError(
-                "Falha de autenticacao no provider configurado. Revise a API key e tente novamente."
+                "Falha de autenticação no provider configurado. Revise a API key e tente novamente."
             ) from exc
         except APITimeoutError as exc:
             logger.warning(
@@ -218,18 +218,18 @@ class OpenAICompatibleProvider(BaseGenAIProvider):
 
 
 def build_provider(settings: GenAISettings) -> BaseGenAIProvider:
-    """Constroi o provider de acordo com a configuracao."""
+    """Constrói o provider de acordo com a configuração."""
     if settings.mock_mode or settings.effective_provider == "mock":
         return MockGenAIProvider(settings)
 
     if settings.effective_provider in {"openai", "groq", "openai_compatible"}:
         return OpenAICompatibleProvider(settings)
 
-    raise GenAIRefinerError(f"Provider GenAI nao suportado: {settings.effective_provider}.")
+    raise GenAIRefinerError(f"Provider GenAI não suportado: {settings.effective_provider}.")
 
 
 def get_genai_settings_from_config(config: Any) -> GenAISettings:
-    """Lê as configuracoes GenAI a partir da app config."""
+    """Lê as configurações GenAI a partir da app config."""
     provider = str(config.get("GENAI_PROVIDER", "mock")).strip().lower()
     raw_mock_mode = config.get("GENAI_MOCK_MODE", True)
     if isinstance(raw_mock_mode, str):
@@ -327,15 +327,15 @@ def build_structured_prompt(
     payload = {
         "task": "Refinar a classe detalhada de um texto sem substituir o baseline.",
         "baseline_role": (
-            "O baseline ja definiu a macroclasse. Sua funcao e sugerir a classe detalhada dentro das opcoes permitidas."
+            "O baseline já definiu a macroclasse. Sua função é sugerir a classe detalhada dentro das opções permitidas."
         ),
         "instructions": [
-            "Escolha somente uma classe detalhada valida.",
+            "Escolha somente uma classe detalhada válida.",
             "Responda em JSON com os campos: detailed_class, justification, priority, ambiguous_case.",
             "Mantenha a justificativa curta e operacional.",
-            "Use a prioridade apenas se o texto indicar urgencia, criticidade ou impacto operacional.",
-            "Marque ambiguous_case como true quando houver sinais conflitantes ou mais de uma classe plausivel.",
-            "Quando houver exemplos similares, use-os como contexto comparativo e nao como regra fixa.",
+            "Use a prioridade apenas se o texto indicar urgência, criticidade ou impacto operacional.",
+            "Marque ambiguous_case como true quando houver sinais conflitantes ou mais de uma classe plausível.",
+            "Quando houver exemplos similares, use-os como contexto comparativo e não como regra fixa.",
         ],
         "predicted_macro": predicted_macro,
         "valid_detailed_classes": valid_detailed_classes,
@@ -360,14 +360,14 @@ def parse_refiner_response(raw_response: str, valid_detailed_classes: list[str])
     try:
         data = json.loads(raw_response)
     except json.JSONDecodeError as exc:
-        raise GenAIRefinerError("A resposta do provider nao veio em JSON valido.") from exc
+        raise GenAIRefinerError("A resposta do provider não veio em JSON válido.") from exc
 
     detailed_class = str(data.get("detailed_class", "")).strip()
     if detailed_class not in valid_detailed_classes:
-        raise GenAIRefinerError("A classe detalhada sugerida nao pertence ao conjunto permitido para a macroclasse.")
+        raise GenAIRefinerError("A classe detalhada sugerida não pertence ao conjunto permitido para a macroclasse.")
 
     justification = str(data.get("justification", "")).strip() or "Sem justificativa informada."
-    priority = str(data.get("priority", "")).strip() or "nao definida"
+    priority = str(data.get("priority", "")).strip() or "não definida"
     ambiguous_case = bool(data.get("ambiguous_case", False))
 
     return {
@@ -379,46 +379,46 @@ def parse_refiner_response(raw_response: str, valid_detailed_classes: list[str])
 
 
 def get_demo_macro_options(artifacts_folder: str | None = None) -> list[dict]:
-    """Retorna as opcoes de macro e classes detalhadas para a tela demo."""
+    """Retorna as opções de macro e classes detalhadas para a tela demo."""
     if artifacts_folder:
         try:
             artifacts = carregar_artefatos_baseline(artifacts_folder)
             return artifacts["metadata"]["refinement_context"]["macro_detail_options"]
         except (BaselineError, KeyError):
-            logger.info("Artefatos hierarquicos indisponiveis. Usando opcoes demo padrao para GenAI.")
+            logger.info("Artefatos hierárquicos indisponíveis. Usando opções demo padrão para GenAI.")
 
     return [
         {
-            "macro_class": "Suporte tecnico",
-            "detail_options": ["Acesso ao portal", "Recuperacao de senha", "Envio de documentos"],
+            "macro_class": "Suporte técnico",
+            "detail_options": ["Acesso ao portal", "Recuperação de senha", "Envio de documentos"],
             "detail_count": 3,
         },
         {
             "macro_class": "Financeiro",
-            "detail_options": ["Segunda via de boleto", "Pagamento nao identificado", "Cobranca contestada"],
+            "detail_options": ["Segunda via de boleto", "Pagamento não identificado", "Cobrança contestada"],
             "detail_count": 3,
         },
         {
-            "macro_class": "Operacao",
-            "detail_options": ["Falha operacional", "Atraso de atendimento", "Instabilidade de integracao"],
+            "macro_class": "Operação",
+            "detail_options": ["Falha operacional", "Atraso de atendimento", "Instabilidade de integração"],
             "detail_count": 3,
         },
         {
-            "macro_class": "Experiencia do cliente",
-            "detail_options": ["Reclamacao de servico", "Feedback positivo", "Solicitacao comercial"],
+            "macro_class": "Experiência do cliente",
+            "detail_options": ["Reclamação de serviço", "Feedback positivo", "Solicitação comercial"],
             "detail_count": 3,
         },
     ]
 
 
 def get_demo_few_shot_examples() -> list[FewShotExample]:
-    """Retorna exemplos simples para few-shot prompting na demonstracao."""
+    """Retorna exemplos simples para few-shot prompting na demonstração."""
     return [
         FewShotExample(
-            text="Nao consigo acessar o portal do cliente porque a conta foi bloqueada e preciso voltar hoje.",
-            macro_class="Suporte tecnico",
+            text="Não consigo acessar o portal do cliente porque a conta foi bloqueada e preciso voltar hoje.",
+            macro_class="Suporte técnico",
             detailed_class="Acesso ao portal",
-            justification="O texto descreve indisponibilidade de acesso ao portal e nao um problema financeiro ou operacional.",
+            justification="O texto descreve indisponibilidade de acesso ao portal e não um problema financeiro ou operacional.",
             priority="alta",
             ambiguous=False,
         ),
@@ -426,23 +426,23 @@ def get_demo_few_shot_examples() -> list[FewShotExample]:
             text="Preciso emitir a segunda via do boleto vencido para regularizar o contrato.",
             macro_class="Financeiro",
             detailed_class="Segunda via de boleto",
-            justification="A mencao explicita a necessidade de boleto atualizado dentro da macro financeira.",
+            justification="A menção explicita a necessidade de boleto atualizado dentro da macro financeira.",
             priority="media",
             ambiguous=False,
         ),
         FewShotExample(
-            text="A integracao com o parceiro caiu e o status dos pedidos nao atualiza.",
-            macro_class="Operacao",
-            detailed_class="Instabilidade de integracao",
-            justification="O problema esta em sincronizacao entre sistemas, com impacto operacional direto.",
+            text="A integração com o parceiro caiu e o status dos pedidos não atualiza.",
+            macro_class="Operação",
+            detailed_class="Instabilidade de integração",
+            justification="O problema está em sincronização entre sistemas, com impacto operacional direto.",
             priority="alta",
             ambiguous=False,
         ),
         FewShotExample(
-            text="Recebemos feedback negativo sobre o atendimento e o cliente pediu retorno da lideranca.",
-            macro_class="Experiencia do cliente",
-            detailed_class="Reclamacao de servico",
-            justification="O caso trata de insatisfacao com o servico prestado e pede tratativa da experiencia.",
+            text="Recebemos feedback negativo sobre o atendimento e o cliente pediu retorno da liderança.",
+            macro_class="Experiência do cliente",
+            detailed_class="Reclamação de serviço",
+            justification="O caso trata de insatisfação com o serviço prestado e pede tratativa da experiência.",
             priority="media",
             ambiguous=False,
         ),
@@ -454,13 +454,13 @@ def extract_payload_from_prompt(prompt: str) -> dict:
     try:
         return json.loads(prompt)
     except json.JSONDecodeError as exc:
-        raise GenAIRefinerError("Nao foi possivel interpretar o prompt estruturado.") from exc
+        raise GenAIRefinerError("Não foi possível interpretar o prompt estruturado.") from exc
 
 
 def fallback_to_mock_response(settings: GenAISettings, prompt: str, reason: str) -> str:
     """Executa fallback seguro para mock quando o provider remoto falha."""
     logger.warning(
-        "Fallback automatico para mock ativado. Provider solicitado='%s', motivo='%s'.",
+        "Fallback automático para mock ativado. Provider solicitado='%s', motivo='%s'.",
         settings.requested_provider,
         reason,
     )
@@ -480,20 +480,20 @@ def fallback_to_mock_response(settings: GenAISettings, prompt: str, reason: str)
 
 
 def build_missing_api_key_message(settings: GenAISettings) -> str:
-    """Monta uma mensagem amigavel para ausencia de credencial."""
+    """Monta uma mensagem amigável para ausência de credencial."""
     if settings.effective_provider == "groq":
         return (
             "Nenhuma chave foi configurada para Groq. Defina GENAI_API_KEY ou GROQ_API_KEY em secret.env "
-            "ou nas variaveis do sistema."
+            "ou nas variáveis do sistema."
         )
     return (
         "Nenhuma chave foi configurada para o provider GenAI. Defina GENAI_API_KEY "
-        "ou a chave especifica do provider."
+        "ou a chave específica do provider."
     )
 
 
 def normalize_optional_string(value: Any) -> str | None:
-    """Normaliza strings opcionais vindas da configuracao."""
+    """Normaliza strings opcionais vindas da configuração."""
     if value is None:
         return None
     normalized = str(value).strip()
@@ -506,17 +506,17 @@ def choose_mock_class(text: str, valid_classes: list[str]) -> str:
 
     keyword_map = {
         "acesso ao portal": ["portal", "login", "acesso", "entrar", "bloqueada", "bloqueado"],
-        "recuperacao de senha": ["senha", "reset", "redefinir", "recuperar", "expirada"],
+        "recuperação de senha": ["senha", "reset", "redefinir", "recuperar", "expirada"],
         "envio de documentos": ["anexo", "arquivo", "documento", "upload", "comprovante"],
         "segunda via de boleto": ["boleto", "segunda via", "2 via", "fatura"],
-        "pagamento nao identificado": ["pagamento", "nao apareceu", "nao baixou", "pendente", "baixa"],
-        "cobranca contestada": ["cobranca", "contestou", "contestada", "indevida", "duplicada"],
+        "pagamento não identificado": ["pagamento", "nao apareceu", "nao baixou", "pendente", "baixa"],
+        "cobrança contestada": ["cobranca", "contestou", "contestada", "indevida", "duplicada"],
         "falha operacional": ["falha", "erro", "travou", "coleta", "roteirizacao"],
         "atraso de atendimento": ["atraso", "sem resposta", "retorno", "demora", "parado"],
-        "instabilidade de integracao": ["integracao", "parceiro", "eventos", "sincronizacao", "status"],
-        "reclamacao de servico": ["reclamacao", "insatisfeito", "negativo", "experiencia ruim", "posicionamento"],
+        "instabilidade de integração": ["integracao", "parceiro", "eventos", "sincronizacao", "status"],
+        "reclamação de serviço": ["reclamacao", "insatisfeito", "negativo", "experiencia ruim", "posicionamento"],
         "feedback positivo": ["elogio", "elogiou", "positivo", "satisfeito", "agilidade"],
-        "solicitacao comercial": ["comercial", "proposta", "novo modulo", "servico adicional", "valores"],
+        "solicitação comercial": ["comercial", "proposta", "novo modulo", "servico adicional", "valores"],
     }
 
     for option_lower, original in normalized_options.items():
@@ -528,8 +528,8 @@ def choose_mock_class(text: str, valid_classes: list[str]) -> str:
 
 
 def infer_priority(text: str) -> str:
-    """Infere uma prioridade simples para a demonstracao mock."""
-    high_terms = ["urgente", "critico", "bloqueado", "parado", "imediato"]
+    """Infere uma prioridade simples para a demonstração mock."""
+    high_terms = ["urgente", "crítico", "bloqueado", "parado", "imediato"]
     medium_terms = ["hoje", "prazo", "vencido", "atraso"]
 
     if any(term in text for term in high_terms):
@@ -540,7 +540,7 @@ def infer_priority(text: str) -> str:
 
 
 def is_ambiguous_case(text: str, valid_classes: list[str]) -> bool:
-    """Sinaliza ambiguidade quando o texto parece compatível com multiplas classes."""
+    """Sinaliza ambiguidade quando o texto parece compatível com múltiplas classes."""
     matches = 0
     for option in valid_classes:
         if option.lower() in text:

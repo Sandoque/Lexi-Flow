@@ -1,4 +1,4 @@
-"""Servico de inferencia ponta a ponta para a experiencia real do LexiFlow."""
+"""Serviço de inferência ponta a ponta para a experiência real do LexiFlow."""
 
 from __future__ import annotations
 
@@ -41,16 +41,16 @@ DEFAULT_CHANNEL_OPTIONS = [
 
 
 class PredictionError(Exception):
-    """Representa erros esperados durante a inferencia ponta a ponta."""
+    """Representa erros esperados durante a inferência ponta a ponta."""
 
 
 def obter_canais_origem_padrao() -> list[str]:
-    """Retorna opcoes simples para o seletor opcional de canal."""
+    """Retorna opções simples para o seletor opcional de canal."""
     return DEFAULT_CHANNEL_OPTIONS.copy()
 
 
 def artefatos_predicao_disponiveis(artifacts_folder: str) -> bool:
-    """Indica se os artefatos hierarquicos ja existem para inferencia."""
+    """Indica se os artefatos hierárquicos já existem para inferência."""
     try:
         carregar_artefatos_baseline(artifacts_folder)
     except BaselineError:
@@ -64,12 +64,12 @@ def executar_fluxo_predicao(
     genai_settings: GenAISettings,
     channel_origin: str | None = None,
 ) -> dict[str, Any]:
-    """Executa o fluxo completo de inferencia com baseline e GenAI complementar."""
+    """Executa o fluxo completo de inferência com baseline e GenAI complementar."""
     normalized_text = str(text or "").strip()
     normalized_channel = str(channel_origin or "").strip()
 
     if not normalized_text:
-        raise PredictionError("Informe um texto para executar a inferencia.")
+        raise PredictionError("Informe um texto para executar a inferência.")
 
     artifacts = carregar_artefatos_para_predicao(artifacts_folder)
     nlp_config = obter_configuracao_nlp_da_modelagem(artifacts["metadata"])
@@ -130,24 +130,24 @@ def executar_fluxo_predicao(
             "trained_at": artifacts["metadata"].get("trained_at"),
             "dataset_path": artifacts["metadata"].get("dataset_path"),
             "dataset_source": artifacts["metadata"].get("dataset_source", "upload"),
-            "dataset_source_label": artifacts["metadata"].get("dataset_source_label", "ultimo upload"),
+            "dataset_source_label": artifacts["metadata"].get("dataset_source_label", "último upload"),
             "dataset_is_demo": bool(artifacts["metadata"].get("dataset_is_demo", False)),
         },
     }
 
 
 def carregar_artefatos_para_predicao(artifacts_folder: str) -> dict[str, Any]:
-    """Carrega artefatos ou orienta o usuario a treinar o baseline primeiro."""
+    """Carrega artefatos ou orienta o usuário a treinar o baseline primeiro."""
     try:
         return carregar_artefatos_baseline(artifacts_folder)
     except BaselineError as exc:
         raise PredictionError(
-            "Os artefatos de inferencia ainda nao existem. Acesse /baseline para treinar o modelo hierarquico."
+            "Os artefatos de inferência ainda não existem. Acesse /baseline para treinar o modelo hierárquico."
         ) from exc
 
 
 def obter_configuracao_nlp_da_modelagem(metadata: dict[str, Any]) -> NLPConfig:
-    """Recupera a configuracao NLP usada no treino para manter consistencia na inferencia."""
+    """Recupera a configuração NLP usada no treino para manter consistência na inferência."""
     raw_config = metadata.get("preprocessing_config")
     if not isinstance(raw_config, dict):
         return obter_configuracao_nlp_padrao()
@@ -169,7 +169,7 @@ def aplicar_preprocessamento_predicao(text: str, nlp_config: NLPConfig) -> dict[
 
 
 def prever_macro_com_confianca(macro_pipeline: Pipeline, processed_text: str) -> dict[str, Any]:
-    """Gera macroclasse e score de confianca a partir do pipeline hierarquico."""
+    """Gera macroclasse e score de confiança a partir do pipeline hierárquico."""
     labels = [str(prediction) for prediction in macro_pipeline.predict([processed_text])]
     macro_label = labels[0]
     confidence = obter_confianca_macro(macro_pipeline, processed_text, macro_label)
@@ -183,7 +183,7 @@ def prever_macro_com_confianca(macro_pipeline: Pipeline, processed_text: str) ->
 
 
 def obter_confianca_macro(macro_pipeline: Pipeline, processed_text: str, predicted_label: str) -> float:
-    """Extrai a confianca da macroclasse quando o estimador suporta probabilidades."""
+    """Extrai a confiança da macroclasse quando o estimador suporta probabilidades."""
     if not hasattr(macro_pipeline, "predict_proba"):
         return 0.0
 
@@ -211,7 +211,7 @@ def obter_classes_detalhadas_validas(detailed_artifact: dict[str, Any], macro_pr
         return [str(model_entry.get("label", ""))]
 
     raise PredictionError(
-        "Nao foi possivel localizar as classes detalhadas da macro prevista nos artefatos do baseline."
+        "Não foi possível localizar as classes detalhadas da macro prevista nos artefatos do baseline."
     )
 
 
@@ -220,7 +220,7 @@ def prever_classe_detalhada_baseline(
     processed_text: str,
     macro_prediction: str,
 ) -> str:
-    """Executa a previsao detalhada inicial antes do refinamento generativo."""
+    """Executa a previsão detalhada inicial antes do refinamento generativo."""
     predictions = predict_detailed(
         detailed_models=cast(dict[str, dict[str, Any]], detailed_artifact["models"]),
         texts=[processed_text],
@@ -242,7 +242,7 @@ def executar_refinamento_genai(
     nlp_config: NLPConfig,
     genai_settings: GenAISettings,
 ) -> dict[str, Any]:
-    """Aciona a camada GenAI sem impedir o uso do baseline quando houver degradacao."""
+    """Aciona a camada GenAI sem impedir o uso do baseline quando houver degradação."""
     refiner = GenAIRefiner(genai_settings)
     prompt_text = montar_texto_para_refinamento(text=text, channel_origin=channel_origin)
     similar_context = recuperar_contexto_similar(
@@ -280,9 +280,9 @@ def executar_refinamento_genai(
             "similar_examples_support": similar_context["support_examples"],
         }
     except GenAIRefinerError as exc:
-        logger.warning("GenAI indisponivel durante a inferencia real: %s", exc)
+        logger.warning("GenAI indisponível durante a inferência real: %s", exc)
         return {
-            "provider": "indisponivel",
+            "provider": "indisponível",
             "requested_provider": genai_settings.requested_provider,
             "mode": "degradado",
             "fallback_reason": str(exc),
@@ -291,10 +291,10 @@ def executar_refinamento_genai(
             "baseline_detail": baseline_detail,
             "detailed_class": baseline_detail,
             "justification": (
-                "A camada GenAI nao respondeu de forma utilizavel. A sugestao detalhada do baseline foi mantida "
+                "A camada GenAI não respondeu de forma utilizável. A sugestão detalhada do baseline foi mantida "
                 "como apoio operacional."
             ),
-            "priority": "nao definida",
+            "priority": "não definida",
             "ambiguous_case": False,
             "status": "baseline_only",
             "similar_examples_used": bool(similar_context["used_count"]),
@@ -318,7 +318,7 @@ def recuperar_contexto_similar(
     dataset_path: str,
     nlp_config: NLPConfig,
 ) -> dict[str, Any]:
-    """Recupera few-shot contextual do historico sem depender de infraestrutura externa."""
+    """Recupera few-shot contextual do histórico sem depender de infraestrutura externa."""
     if not dataset_path:
         return {
             "few_shot_examples": [],
@@ -338,7 +338,7 @@ def recuperar_contexto_similar(
             restrict_to_macro=True,
         )
     except SimilarExamplesError as exc:
-        logger.warning("Nao foi possivel recuperar casos similares para a GenAI: %s", exc)
+        logger.warning("Não foi possível recuperar casos similares para a GenAI: %s", exc)
         return {
             "few_shot_examples": [],
             "support_examples": [],
@@ -349,22 +349,22 @@ def recuperar_contexto_similar(
 
 
 def listar_etapas_preprocessamento(config: NLPConfig) -> list[str]:
-    """Resume as etapas do NLP usadas na inferencia para auditoria leve."""
+    """Resume as etapas do NLP usadas na inferência para auditoria leve."""
     steps: list[str] = []
     config_dict = asdict(config)
 
     if bool(config_dict["normalize_text"]):
-        steps.append("normalizacao")
+        steps.append("normalização")
     if bool(config_dict["clean_whitespace"]):
-        steps.append("limpeza de espacos")
+        steps.append("limpeza de espaços")
     if bool(config_dict["lowercase"]):
         steps.append("lowercase")
     if bool(config_dict["remove_punctuation"]):
-        steps.append("remocao de pontuacao")
+        steps.append("remoção de pontuação")
     if bool(config_dict["remove_stopwords"]):
-        steps.append("remocao de stopwords")
+        steps.append("remoção de stopwords")
     if bool(config_dict["lemmatize"]):
-        steps.append("lematizacao")
+        steps.append("lematização")
 
-    steps.append("tokenizacao")
+    steps.append("tokenização")
     return steps

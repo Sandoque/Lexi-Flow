@@ -1,4 +1,4 @@
-"""Servicos para treino hierarquico, avaliacao e persistencia do baseline."""
+"""Serviços para treino hierárquico, avaliação e persistência do baseline."""
 
 from __future__ import annotations
 
@@ -48,10 +48,37 @@ class BaselineError(Exception):
 def get_baseline_placeholder() -> dict:
     """Retorna um resumo inicial para a etapa de modelagem baseline."""
     return {
-        "stage": "Classificacao textual baseline",
-        "status": "Disponivel",
-        "details": "Fluxo hierarquico com macroclasse no nivel 1 e classe detalhada no nivel 2.",
+        "stage": "Classificação textual baseline",
+        "status": "Disponível",
+        "details": "Fluxo hierárquico com macroclasse no nível 1 e classe detalhada no nível 2.",
     }
+
+
+def obter_decisoes_tecnicas_baseline() -> list[dict[str, str]]:
+    """Resume as principais decisões técnicas para defesa do baseline."""
+    return [
+        {
+            "title": "Baseline primeiro",
+            "description": (
+                "TF-IDF com Logistic Regression entrega um ponto de partida rápido, reproduzível e explicável "
+                "antes de introduzir camadas mais custosas ou menos controladas."
+            ),
+        },
+        {
+            "title": "Hierarquia macro -> detalhada",
+            "description": (
+                "O problema de negócio não é plano. Primeiro faz sentido identificar a natureza do caso e, "
+                "depois, restringir o motivo detalhado dentro desse contexto."
+            ),
+        },
+        {
+            "title": "GenAI depois do baseline",
+            "description": (
+                "A camada generativa entra como refinamento e explicabilidade. Ela não substitui a triagem "
+                "supervisionada, mas complementa os casos com mais ambiguidade ou contexto operacional."
+            ),
+        },
+    ]
 
 
 def executar_treinamento_baseline(
@@ -65,7 +92,7 @@ def executar_treinamento_baseline(
     random_state: int = DEFAULT_RANDOM_STATE,
     nlp_config: NLPConfig | None = None,
 ) -> dict:
-    """Executa o baseline hierarquico completo em dois niveis."""
+    """Executa o baseline hierárquico completo em dois níveis."""
     dataset_selection = localizar_arquivo_baseline(
         upload_folder=upload_folder,
         preferred_path=preferred_path,
@@ -117,19 +144,19 @@ def executar_treinamento_baseline(
         test_df=split_data["test_df"],
         true_column=MACRO_TARGET,
         predictions=macro_predictions,
-        chart_title="Matriz de confusao - macroclasse",
+        chart_title="Matriz de confusão - macroclasse",
     )
     detailed_evaluation = avaliar_predicoes(
         test_df=split_data["test_df"],
         true_column=DETAILED_TARGET,
         predictions=detailed_predictions,
-        chart_title="Matriz de confusao - classe detalhada",
+        chart_title="Matriz de confusão - classe detalhada",
     )
     detailed_oracle_evaluation = avaliar_predicoes(
         test_df=split_data["test_df"],
         true_column=DETAILED_TARGET,
         predictions=oracle_detailed_predictions,
-        chart_title="Matriz de confusao - detalhada com macro real",
+        chart_title="Matriz de confusão - detalhada com macro real",
     )
 
     refinement_context = montar_contexto_refinamento(detailed_artifact["metadata"])
@@ -176,8 +203,8 @@ def executar_treinamento_baseline(
         },
         "hierarchy": {
             "macro": {
-                "level": "Nivel 1",
-                "title": "Classificacao macro",
+                "level": "Nível 1",
+                "title": "Classificação macro",
                 "target": MACRO_TARGET,
                 "metrics": macro_evaluation["metrics"],
                 "classification_report": macro_evaluation["classification_report"],
@@ -186,7 +213,7 @@ def executar_treinamento_baseline(
                 "examples": macro_evaluation["examples"],
             },
             "detailed": {
-                "level": "Nivel 2",
+                "level": "Nível 2",
                 "title": "Refinamento detalhado",
                 "target": DETAILED_TARGET,
                 "metrics": detailed_evaluation["metrics"],
@@ -201,8 +228,8 @@ def executar_treinamento_baseline(
                 "coverage_by_macro": detailed_artifact["metadata"],
             },
             "generative_ready": {
-                "stage": "Proximo encaixe",
-                "description": "A camada generativa podera atuar apos a previsao macro, usando o conjunto de classes detalhadas permitidas por macro como contexto de refinamento.",
+                "stage": "Próximo encaixe",
+                "description": "A camada generativa poderá atuar após a previsão macro, usando o conjunto de classes detalhadas permitidas por macro como contexto de refinamento.",
                 "hooks": [
                     "macro_predita",
                     "classes_detalhadas_permitidas",
@@ -215,11 +242,17 @@ def executar_treinamento_baseline(
             "detailed_accuracy": detailed_evaluation["metrics"]["accuracy"],
             "detailed_accuracy_with_true_macro": detailed_oracle_evaluation["metrics"]["accuracy"],
         },
+        "technical_decisions": obter_decisoes_tecnicas_baseline(),
+        "error_analysis": montar_leitura_critica_baseline(
+            macro_evaluation=macro_evaluation,
+            detailed_evaluation=detailed_evaluation,
+            detailed_oracle_evaluation=detailed_oracle_evaluation,
+        ),
         "artifacts": artifact_paths,
         "limitations": [
-            "Erros na macroclasse impactam diretamente a previsao detalhada no fluxo hierarquico.",
-            "TF-IDF com regressao logistica e um baseline forte, mas nao modela contexto profundo ou ambiguidade semantica.",
-            "A camada detalhada herda a qualidade da taxonomia e da separacao entre classes por macro.",
+            "Erros na macroclasse impactam diretamente a previsão detalhada no fluxo hierárquico.",
+            "TF-IDF com regressão logística é um baseline forte, mas não modela contexto profundo ou ambiguidade semântica.",
+            "A camada detalhada herda a qualidade da taxonomia e da separação entre classes por macro.",
         ],
     }
 
@@ -278,7 +311,7 @@ def train_detailed_classifier(
         )
 
     if not models:
-        raise BaselineError("Nao foi possivel treinar a camada detalhada com o dataset atual.")
+        raise BaselineError("Não foi possível treinar a camada detalhada com o dataset atual.")
 
     global_model = treinar_modelo_global_detalhado(train_df, random_state=random_state)
     global_fallback_label = str(
@@ -330,7 +363,7 @@ def localizar_arquivo_baseline(
     dataset_source: str | None = None,
     use_demo_by_default: bool = False,
 ) -> DatasetSelection:
-    """Resolve o dataset que sera usado no treino baseline."""
+    """Resolve o dataset que será usado no treino baseline."""
     try:
         return localizar_dataset_disponivel(
             upload_folder=upload_folder,
@@ -341,7 +374,7 @@ def localizar_arquivo_baseline(
         )
     except FileNotFoundError as exc:
         raise BaselineError(
-            "Nenhum dataset disponivel para treinamento. Faca um upload ou configure o dataset demo antes do baseline."
+            "Nenhum dataset disponível para treinamento. Faça um upload ou configure o dataset demo antes do baseline."
         ) from exc
 
 
@@ -350,19 +383,19 @@ def carregar_dataset_baseline(dataset_path: str | Path) -> pd.DataFrame:
     try:
         dataframe = pd.read_csv(dataset_path)
     except (UnicodeDecodeError, ParserError):
-        raise BaselineError("O dataset selecionado nao pode ser interpretado como CSV valido.")
+        raise BaselineError("O dataset selecionado não pode ser interpretado como CSV válido.")
     except EmptyDataError:
-        raise BaselineError("O dataset selecionado nao possui registros para treinamento.")
+        raise BaselineError("O dataset selecionado não possui registros para treinamento.")
 
     dataframe.columns = [str(column).strip() for column in dataframe.columns]
     missing_columns = [column for column in REQUIRED_COLUMNS if column not in dataframe.columns]
 
     if missing_columns:
         missing_text = ", ".join(missing_columns)
-        raise BaselineError(f"O dataset nao possui todas as colunas obrigatorias. Faltam: {missing_text}.")
+        raise BaselineError(f"O dataset não possui todas as colunas obrigatórias. Faltam: {missing_text}.")
 
     if dataframe.empty:
-        raise BaselineError("O dataset selecionado esta vazio.")
+        raise BaselineError("O dataset selecionado está vazio.")
 
     return dataframe
 
@@ -388,7 +421,7 @@ def preparar_dados_modelagem(
     ].copy()
 
     if prepared_df.empty:
-        raise BaselineError("Nao ha registros validos apos o pre-processamento para treinar o baseline.")
+        raise BaselineError("Não há registros válidos após o pré-processamento para treinar o baseline.")
 
     return prepared_df
 
@@ -399,13 +432,13 @@ def preparar_treino_teste(
     test_size: float = DEFAULT_TEST_SIZE,
     random_state: int = DEFAULT_RANDOM_STATE,
 ) -> dict:
-    """Separa treino e teste de forma reproduzivel e com estratificacao quando possivel."""
+    """Separa treino e teste de forma reproduzível e com estratificação quando possível."""
     if modeling_df.shape[0] < 6:
-        raise BaselineError("Sao necessarios ao menos 6 registros validos para treinar o baseline hierarquico.")
+        raise BaselineError("São necessários ao menos 6 registros válidos para treinar o baseline hierárquico.")
 
     class_counts = modeling_df[target_column].value_counts()
     if class_counts.shape[0] < 2:
-        raise BaselineError("O nivel macro exige pelo menos duas classes distintas para treinamento.")
+        raise BaselineError("O nível macro exige pelo menos duas classes distintas para treinamento.")
 
     warnings: list[str] = []
     stratify = modeling_df[target_column]
@@ -417,13 +450,13 @@ def preparar_treino_teste(
         stratify = None
         stratified = False
         warnings.append(
-            "Nem todas as classes macro possuem ao menos 2 exemplos. O split foi feito sem estratificacao."
+            "Nem todas as classes macro possuem ao menos 2 exemplos. O split foi feito sem estratificação."
         )
     elif test_count < class_count:
         stratify = None
         stratified = False
         warnings.append(
-            "O conjunto de teste seria menor que o numero de macroclasses. O split foi ajustado sem estratificacao."
+            "O conjunto de teste seria menor que o número de macroclasses. O split foi ajustado sem estratificação."
         )
 
     train_df, test_df = train_test_split(
@@ -442,7 +475,7 @@ def preparar_treino_teste(
 
 
 def construir_pipeline_baseline(random_state: int = DEFAULT_RANDOM_STATE) -> Pipeline:
-    """Constroi o pipeline TF-IDF + Logistic Regression compartilhado."""
+    """Constrói o pipeline TF-IDF + Logistic Regression compartilhado."""
     return Pipeline(
         steps=[
             (
@@ -471,7 +504,7 @@ def treinar_modelo_global_detalhado(
     train_df: pd.DataFrame,
     random_state: int = DEFAULT_RANDOM_STATE,
 ) -> dict[str, Any]:
-    """Treina um modelo global de classe detalhada para fallback e comparacoes futuras."""
+    """Treina um modelo global de classe detalhada para fallback e comparações futuras."""
     labels = train_df[DETAILED_TARGET].astype(str)
     unique_labels = sorted(list(labels.unique()))
 
@@ -494,7 +527,7 @@ def prever_com_modelo_detalhado(
     text: str,
     fallback_label: str,
 ) -> str:
-    """Realiza previsao em um modelo detalhado individual ou constante."""
+    """Realiza previsão em um modelo detalhado individual ou constante."""
     if model_entry["type"] == "constant":
         return model_entry["label"]
     if model_entry["type"] == "pipeline":
@@ -508,7 +541,7 @@ def avaliar_predicoes(
     predictions: list[str],
     chart_title: str,
 ) -> dict:
-    """Calcula metricas, exemplos e matriz de confusao para um conjunto de predicoes."""
+    """Calcula métricas, exemplos e matriz de confusão para um conjunto de predições."""
     labels = sorted(set(list(test_df[true_column].astype(str))) | set(predictions))
     matrix = confusion_matrix(test_df[true_column], predictions, labels=labels)
 
@@ -599,8 +632,76 @@ def coletar_exemplos_predicao(
     ]
 
 
+def montar_leitura_critica_baseline(
+    macro_evaluation: dict[str, Any],
+    detailed_evaluation: dict[str, Any],
+    detailed_oracle_evaluation: dict[str, Any],
+) -> dict[str, Any]:
+    """Traduz métricas em mensagens curtas para leitura crítica do baseline."""
+    macro_accuracy = float(macro_evaluation["metrics"]["accuracy"])
+    detailed_accuracy = float(detailed_evaluation["metrics"]["accuracy"])
+    oracle_accuracy = float(detailed_oracle_evaluation["metrics"]["accuracy"])
+    propagation_gap = round(max(oracle_accuracy - detailed_accuracy, 0.0), 4)
+
+    if propagation_gap >= 0.1:
+        propagation_message = (
+            "A queda entre a detalhada real e a detalhada condicionada pela macro mostra que erros no nível 1 "
+            "ainda pressionam a qualidade final do fluxo."
+        )
+    elif propagation_gap > 0:
+        propagation_message = (
+            "Existe alguma propagação de erro da macro para o detalhamento, mas o filtro hierárquico ainda "
+            "preserva boa parte do ganho operacional."
+        )
+    else:
+        propagation_message = (
+            "A diferença entre a detalhada real e a detalhada condicionada ficou baixa nesta amostra, sinal "
+            "de que a etapa macro está bem alinhada com o nível detalhado."
+        )
+
+    lowest_recall_rows = sorted(
+        [
+            row
+            for row in cast(list[dict[str, Any]], detailed_evaluation["classification_rows"])
+            if row["label"] not in {"macro avg", "weighted avg"}
+        ],
+        key=lambda row: (float(row["recall"]), float(row["support"])),
+    )[:3]
+
+    risk_patterns = [
+        (
+            f"A classe '{row['label']}' pediu atenção, com recall {row['recall']} e suporte {row['support']}, "
+            "o que sugere risco maior de confusão no detalhamento."
+        )
+        for row in lowest_recall_rows
+    ]
+
+    if not risk_patterns:
+        risk_patterns.append(
+            "A amostra avaliada foi pequena, então o principal cuidado é validar estabilidade quando novos casos entrarem."
+        )
+
+    if macro_accuracy < 0.75:
+        genai_role = (
+            "Como a macro ainda pode oscilar, a GenAI ajuda mais como camada explicativa e apoio humano do que "
+            "como simples refinamento do nivel detalhado."
+        )
+    else:
+        genai_role = (
+            "Com a macro relativamente estável, a GenAI fica bem posicionada para explicar, priorizar e refinar "
+            "casos ambíguos no nível detalhado."
+        )
+
+    return {
+        "propagation_gap": propagation_gap,
+        "propagation_message": propagation_message,
+        "risk_patterns": risk_patterns,
+        "genai_role": genai_role,
+    }
+
+
 def montar_contexto_refinamento(detailed_metadata: list[dict]) -> dict:
-    """Monta o contexto que podera alimentar uma futura camada generativa."""
+    """Monta o contexto que poderá alimentar uma futura camada generativa."""
     macro_detail_options = [
         {
             "macro_class": item["macro_class"],
@@ -647,7 +748,7 @@ def salvar_artefatos_baseline(
 
 
 def carregar_artefatos_baseline(artifacts_folder: str | Path) -> dict:
-    """Carrega os artefatos previamente salvos do baseline hierarquico."""
+    """Carrega os artefatos previamente salvos do baseline hierárquico."""
     artifact_dir = Path(artifacts_folder)
     macro_pipeline_path = artifact_dir / "baseline_hierarchical_macro_pipeline.joblib"
     macro_vectorizer_path = artifact_dir / "baseline_hierarchical_macro_vectorizer.joblib"
@@ -663,7 +764,7 @@ def carregar_artefatos_baseline(artifacts_folder: str | Path) -> dict:
         metadata_path,
     ]
     if not all(path.exists() for path in paths):
-        raise BaselineError("Os artefatos hierarquicos ainda nao foram gerados.")
+        raise BaselineError("Os artefatos hierárquicos ainda não foram gerados.")
 
     return {
         "macro_pipeline": joblib.load(macro_pipeline_path),

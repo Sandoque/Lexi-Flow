@@ -5,12 +5,12 @@
 {% block content %}
 <section class="section-heading">
     <div>
-        <p class="eyebrow">Etapa 02 · Analise exploratoria</p>
+        <p class="eyebrow">Etapa 02 · Análise exploratória</p>
         <h1>Painel inicial do dataset</h1>
     </div>
     <p>
-        Visao consolidada do ultimo CSV disponivel para o case, com indicadores estruturais, metricas textuais
-        e distribuicoes centrais para classificacao textual.
+        Visão consolidada do último CSV disponível para o case, com indicadores estruturais, métricas textuais
+        e distribuições centrais para classificação textual.
     </p>
 </section>
 
@@ -20,14 +20,14 @@
         <h2>{{ eda_result.dataset.source_label }}</h2>
         <p>
             {% if eda_result.dataset.is_demo %}
-                Esta analise esta usando o dataset demo da apresentacao.
+                Esta análise está usando o dataset demo da apresentação.
             {% else %}
-                Esta analise esta usando o ultimo upload disponivel na sessao.
+                Esta análise está usando o último upload disponível na sessão.
             {% endif %}
         </p>
     </div>
     <div class="action-row">
-        <a class="button {% if not using_demo_dataset %}button-primary{% else %}button-secondary{% endif %}" href="{{ url_for('pipeline.eda', dataset_source='upload') }}">Usar ultimo upload</a>
+        <a class="button {% if not using_demo_dataset %}button-primary{% else %}button-secondary{% endif %}" href="{{ url_for('pipeline.eda', dataset_source='upload') }}">Usar último upload</a>
         <a class="button {% if using_demo_dataset %}button-primary{% else %}button-secondary{% endif %}" href="{{ url_for('pipeline.eda', dataset_source='demo') }}">Usar dataset demo</a>
         <a class="button button-secondary" href="{{ url_for('pipeline.baseline', dataset_source=dataset_source) }}">Seguir para baseline</a>
     </div>
@@ -47,11 +47,11 @@
         <strong>{{ eda_result.metrics.detailed_class_count }}</strong>
     </article>
     <article class="metric-card">
-        <span>Media de caracteres</span>
+        <span>Média de caracteres</span>
         <strong>{{ eda_result.metrics.avg_text_chars }}</strong>
     </article>
     <article class="metric-card">
-        <span>Media de palavras</span>
+        <span>Média de palavras</span>
         <strong>{{ eda_result.metrics.avg_text_words }}</strong>
     </article>
 </section>
@@ -60,12 +60,12 @@
     <article class="panel chart-panel">
         <div class="table-header">
             <div>
-                <p class="eyebrow">Distribuicao</p>
+                <p class="eyebrow">Distribuição</p>
                 <h2>Classe macro</h2>
             </div>
             <p>Quantidade de registros por macroclasse.</p>
         </div>
-        <img src="{{ eda_result.charts.macro }}" alt="Grafico de distribuicao por classe macro" class="chart-image">
+        <img src="{{ eda_result.charts.macro }}" alt="Gráfico de distribuição por classe macro" class="chart-image">
         <ul class="distribution-list">
             {% for item in eda_result.distributions.macro %}
                 <li><span>{{ item.label }}</span><strong>{{ item.value }}</strong></li>
@@ -81,7 +81,7 @@
             </div>
             <p>Ranking das classes detalhadas mais frequentes.</p>
         </div>
-        <img src="{{ eda_result.charts.detailed }}" alt="Grafico das principais classes detalhadas" class="chart-image">
+        <img src="{{ eda_result.charts.detailed }}" alt="Gráfico das principais classes detalhadas" class="chart-image">
         <ul class="distribution-list">
             {% for item in eda_result.distributions.detailed_top %}
                 <li><span>{{ item.label }}</span><strong>{{ item.value }}</strong></li>
@@ -95,9 +95,9 @@
                 <p class="eyebrow">Origem</p>
                 <h2>Canal de entrada</h2>
             </div>
-            <p>Distribuicao dos registros por canal de origem.</p>
+                <p>Distribuição dos registros por canal de origem.</p>
         </div>
-        <img src="{{ eda_result.charts.channel }}" alt="Grafico de distribuicao por canal de origem" class="chart-image">
+        <img src="{{ eda_result.charts.channel }}" alt="Gráfico de distribuição por canal de origem" class="chart-image">
         <ul class="distribution-list">
             {% for item in eda_result.distributions.channel %}
                 <li><span>{{ item.label }}</span><strong>{{ item.value }}</strong></li>
@@ -134,7 +134,7 @@
             <p class="eyebrow">Amostras</p>
             <h2>Exemplos de textos por macroclasse</h2>
         </div>
-        <p>Recorte inicial para inspecao qualitativa do corpus antes da modelagem.</p>
+                <p>Recorte inicial para inspeção qualitativa do corpus antes da modelagem.</p>
     </div>
 
     <div class="examples-grid">

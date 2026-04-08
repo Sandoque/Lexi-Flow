@@ -7,6 +7,11 @@ from app import create_app
 from app.services.genai_refiner import OpenAICompatibleProvider
 
 
+def utf8(text: str) -> bytes:
+    """Codifica textos esperados em UTF-8 para asserts de resposta HTML."""
+    return text.encode("utf-8")
+
+
 def test_create_app_uses_testing_config():
     """Garante que a fabrica retorna uma instancia Flask configurada."""
     app = create_app("testing")
@@ -34,9 +39,9 @@ def test_architecture_route_returns_case_presentation():
     response = client.get("/arquitetura")
 
     assert response.status_code == 200
-    assert b"Visao de produto da solucao" in response.data
-    assert b"Roadmap de Evolucao" in response.data
-    assert b"Operacao assistida" in response.data
+    assert utf8("Visão de produto da solução") in response.data
+    assert utf8("Roadmap de Evolução") in response.data
+    assert utf8("Operação assistida") in response.data
 
 
 def test_health_route_returns_ok_payload():
@@ -71,7 +76,7 @@ def test_upload_route_processes_valid_csv(tmp_path: Path):
     )
 
     assert response.status_code == 200
-    assert b"Arquivo validado e salvo com sucesso" in response.data
+    assert utf8("Arquivo validado e salvo com sucesso") in response.data
     assert b"Primeiras 10 linhas" in response.data
     assert (tmp_path / "base.csv").exists()
 
@@ -91,7 +96,7 @@ def test_upload_route_rejects_missing_columns(tmp_path: Path):
     )
 
     assert response.status_code == 200
-    assert b"colunas obrigatorias" in response.data
+    assert utf8("colunas obrigatórias") in response.data
 
 
 def test_eda_route_uses_latest_dataset(tmp_path: Path):
@@ -111,7 +116,7 @@ def test_eda_route_uses_latest_dataset(tmp_path: Path):
     response = client.get("/eda")
 
     assert response.status_code == 200
-    assert b"Painel inicial do dataset" in response.data
+    assert utf8("Painel inicial do dataset") in response.data
     assert b"Atendimento" in response.data
     assert b"Suporte" in response.data
 
@@ -125,7 +130,7 @@ def test_eda_route_redirects_when_no_dataset(tmp_path: Path):
     response = client.get("/eda", follow_redirects=True)
 
     assert response.status_code == 200
-    assert b"Nenhum dataset disponivel para analise" in response.data
+    assert utf8("Nenhum dataset disponível para análise") in response.data
     assert b"Upload de CSV" in response.data
 
 
@@ -175,10 +180,10 @@ def test_baseline_route_trains_with_valid_dataset(tmp_path: Path):
     response = client.get("/baseline")
 
     assert response.status_code == 200
-    assert b"Painel supervisionado em dois niveis" in response.data
-    assert b"Nivel 1" in response.data
-    assert b"Nivel 2" in response.data
-    assert b"Matriz de confusao" in response.data
+    assert utf8("Painel supervisionado em dois níveis") in response.data
+    assert utf8("Nível 1") in response.data
+    assert utf8("Nível 2") in response.data
+    assert utf8("Matriz de confusão") in response.data
 
 
 def test_baseline_route_can_train_with_demo_dataset(tmp_path: Path):
@@ -207,7 +212,7 @@ def test_baseline_route_can_train_with_demo_dataset(tmp_path: Path):
 
     assert response.status_code == 200
     assert b"dataset demo" in response.data
-    assert b"Painel supervisionado em dois niveis" in response.data
+    assert utf8("Painel supervisionado em dois níveis") in response.data
 
 
 def test_genai_demo_route_renders_with_mock_mode(tmp_path: Path):
@@ -242,7 +247,7 @@ def test_genai_demo_route_classifies_text_in_mock_mode(tmp_path: Path):
     )
 
     assert response.status_code == 200
-    assert b"Sugestao do LLM" in response.data
+    assert utf8("Sugestão do LLM") in response.data
     assert b"Segunda via de boleto" in response.data
     assert b"mock" in response.data
 
@@ -316,7 +321,7 @@ def test_predict_route_guides_user_when_artifacts_are_missing(tmp_path: Path):
     response = client.get("/predict")
 
     assert response.status_code == 200
-    assert b"Artefatos ainda nao disponiveis" in response.data
+    assert utf8("Artefatos ainda não disponíveis") in response.data
     assert b"Ir para /baseline" in response.data
 
 
@@ -355,13 +360,13 @@ def test_predict_route_runs_end_to_end_in_mock_mode(tmp_path: Path):
     )
 
     assert response.status_code == 200
-    assert b"Predicao estatistica" in response.data
-    assert b"Classe detalhada sugerida" in response.data
-    assert b"Fluxo Operacional Recomendado" in response.data
+    assert utf8("Predição estatística") in response.data
+    assert utf8("Classe detalhada sugerida") in response.data
+    assert utf8("Fluxo Operacional Recomendado") in response.data
     assert b"Casos similares usados como apoio" in response.data
     assert b"Financeiro" in response.data
     assert b"Boleto" in response.data
-    assert b"Provider usado" in response.data
+    assert utf8("Provider usado") in response.data
 
 
 def test_predict_route_shows_demo_model_source(tmp_path: Path):
@@ -402,5 +407,5 @@ def test_predict_route_shows_demo_model_source(tmp_path: Path):
     )
 
     assert response.status_code == 200
-    assert b"Fonte do modelo atual" in response.data
+    assert utf8("Fonte do modelo atual") in response.data
     assert b"dataset demo" in response.data

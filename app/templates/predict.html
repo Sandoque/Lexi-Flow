@@ -1,21 +1,21 @@
 {% extends "base.html" %}
 
-{% block title %}{{ app_name }} | Predicao{% endblock %}
+{% block title %}{{ app_name }} | Predição{% endblock %}
 
 {% block content %}
 <section class="section-heading">
     <div>
-        <p class="eyebrow">Etapas 05 e 06 · Refinamento e operacao</p>
-        <h1>Predicao assistida em fluxo real</h1>
+        <p class="eyebrow">Etapas 05 e 06 · Refinamento e operação</p>
+        <h1>Predição assistida em fluxo real</h1>
     </div>
-    <p>Entrada nova, baseline hierarquico, GenAI complementar e decisao operacional na mesma leitura.</p>
+    <p>Entrada nova, baseline hierárquico, GenAI complementar e decisão operacional na mesma leitura.</p>
 </section>
 
 {% if not artifacts_ready %}
     <section class="panel">
-        <p class="eyebrow">Dependencia de modelo</p>
-        <h2>Artefatos ainda nao disponiveis</h2>
-        <p>Treine primeiro o baseline para habilitar a inferencia ponta a ponta.</p>
+        <p class="eyebrow">Dependência de modelo</p>
+        <h2>Artefatos ainda não disponíveis</h2>
+        <p>Treine primeiro o baseline para habilitar a inferência ponta a ponta.</p>
         <div class="action-row">
             <a class="button button-primary" href="{{ url_for('pipeline.baseline', dataset_source=dataset_source) }}">Ir para /baseline</a>
         </div>
@@ -27,7 +27,7 @@
         <div class="table-header">
             <div>
                 <p class="eyebrow">Entrada</p>
-                <h2>Novo caso para classificacao</h2>
+                <h2>Novo caso para classificação</h2>
             </div>
             <div class="status-badges">
                 <span class="state-pill {% if using_demo_dataset %}state-pill--accent{% else %}state-pill--info{% endif %}">
@@ -42,7 +42,7 @@
             <select id="channel_origin" name="channel_origin">
                 {% for option in channel_options %}
                     <option value="{{ option }}" {% if option == selected_channel %}selected{% endif %}>
-                        {{ option if option else "Nao informado" }}
+                        {{ option if option else "Não informado" }}
                     </option>
                 {% endfor %}
             </select>
@@ -53,11 +53,11 @@
                 name="text_input"
                 rows="9"
                 class="textarea-input"
-                placeholder="Cole aqui um novo texto para classificacao assistida."
+                placeholder="Cole aqui um novo texto para classificação assistida."
             >{{ text_input }}</textarea>
 
             <div class="action-row">
-                <button type="submit" class="button button-primary">Executar inferencia</button>
+                <button type="submit" class="button button-primary">Executar inferência</button>
                 <a class="button button-secondary" href="{{ url_for('pipeline.baseline', dataset_source=dataset_source) }}">Rever baseline</a>
                 <a class="button button-secondary" href="{{ url_for('pipeline.genai_demo') }}">Abrir GenAI Demo</a>
             </div>
@@ -66,13 +66,13 @@
 
     <aside class="panel panel-inner panel-subtle">
         <p class="eyebrow">Leitura da demo</p>
-        <h2>O que esta em foco</h2>
+        <h2>O que está em foco</h2>
         <ul class="distribution-list">
-            <li><span>1. Macro prevista</span><strong>decisao do baseline</strong></li>
-            <li><span>2. Confianca</span><strong>sinal para operacao</strong></li>
+            <li><span>1. Macro prevista</span><strong>decisão do baseline</strong></li>
+            <li><span>2. Confiança</span><strong>sinal para operação</strong></li>
             <li><span>3. Classe detalhada</span><strong>refinamento final</strong></li>
             <li><span>4. Provider usado</span><strong>mock ou groq</strong></li>
-            <li><span>5. Fluxo operacional</span><strong>acao recomendada</strong></li>
+            <li><span>5. Fluxo operacional</span><strong>ação recomendada</strong></li>
         </ul>
     </aside>
 </section>
@@ -84,7 +84,7 @@
             <strong>{{ prediction_result.baseline.macro_class }}</strong>
         </article>
         <article class="metric-card">
-            <span>Confianca</span>
+            <span>Confiança</span>
             <strong>{{ prediction_result.baseline.macro_confidence_percent }}</strong>
         </article>
         <article class="metric-card">
@@ -101,8 +101,8 @@
         <article class="panel">
             <div class="table-header">
                 <div>
-                    <p class="eyebrow">Decisao da classificacao</p>
-                    <h2>Saida consolidada</h2>
+                    <p class="eyebrow">Decisão da classificação</p>
+                    <h2>Saída consolidada</h2>
                 </div>
                 <div class="status-badges">
                     <span class="state-pill {% if prediction_result.genai.provider == 'groq' %}state-pill--success{% elif prediction_result.genai.provider == 'mock' %}state-pill--warning{% else %}state-pill--danger{% endif %}">
@@ -116,11 +116,11 @@
                 <li><span>Classe detalhada sugerida</span><strong>{{ prediction_result.genai.detailed_class }}</strong></li>
                 <li><span>Justificativa</span><strong>{{ prediction_result.genai.justification }}</strong></li>
                 <li><span>Prioridade sugerida</span><strong>{{ prediction_result.genai.priority }}</strong></li>
-                <li><span>Caso ambiguo</span><strong>{% if prediction_result.genai.ambiguous_case %}Sim{% else %}Nao{% endif %}</strong></li>
+                <li><span>Caso ambíguo</span><strong>{% if prediction_result.genai.ambiguous_case %}Sim{% else %}Não{% endif %}</strong></li>
             </ul>
             {% if prediction_result.genai.fallback_reason %}
                 <div class="predict-alert">
-                    <strong>Observacao operacional</strong>
+                    <strong>Observação operacional</strong>
                     <p>{{ prediction_result.genai.fallback_reason }}</p>
                 </div>
             {% endif %}
@@ -132,39 +132,39 @@
                     <p class="eyebrow">Fluxo operacional</p>
                     <h2>Fluxo Operacional Recomendado</h2>
                 </div>
-                <p>Leitura principal para o publico de negocio.</p>
+                <p>Leitura principal para o público de negócio.</p>
             </div>
             <div class="routing-card routing-card--{{ prediction_result.routing.badge_tone }}">
-                <span class="routing-card__label">Decisao</span>
+                <span class="routing-card__label">Decisão</span>
                 <strong>{{ prediction_result.routing.decision }}</strong>
                 <p>{{ prediction_result.routing.reason }}</p>
             </div>
             <ul class="distribution-list">
-                <li><span>Nivel de confianca</span><strong>{{ prediction_result.routing.confidence_level }}</strong></li>
-                <li><span>Acao sugerida</span><strong>{{ prediction_result.routing.action }}</strong></li>
-                <li><span>Observacao para o operador</span><strong>{{ prediction_result.routing.operator_note }}</strong></li>
+                <li><span>Nível de confiança</span><strong>{{ prediction_result.routing.confidence_level }}</strong></li>
+                <li><span>Ação sugerida</span><strong>{{ prediction_result.routing.action }}</strong></li>
+                <li><span>Observação para o operador</span><strong>{{ prediction_result.routing.operator_note }}</strong></li>
                 <li><span>Fila recomendada</span><strong>{{ prediction_result.routing.queue }}</strong></li>
             </ul>
         </article>
     </section>
 
     <details class="panel details-panel">
-        <summary>Detalhes tecnicos opcionais</summary>
+        <summary>Detalhes técnicos opcionais</summary>
         <div class="details-panel__content">
             <section class="predict-summary-grid">
                 <article class="panel panel-subtle">
                     <div class="table-header">
                         <div>
                             <p class="eyebrow">NLP e baseline</p>
-                            <h2>Predicao estatistica</h2>
+                            <h2>Predição estatística</h2>
                         </div>
-                        <p>Informacoes uteis para leitura tecnica.</p>
+                        <p>Informações úteis para leitura técnica.</p>
                     </div>
                     <ul class="distribution-list">
-                        <li><span>Canal de origem</span><strong>{{ prediction_result.input.channel_origin or "Nao informado" }}</strong></li>
+                        <li><span>Canal de origem</span><strong>{{ prediction_result.input.channel_origin or "Não informado" }}</strong></li>
                         <li><span>Texto original</span><strong>{{ prediction_result.input.original_text }}</strong></li>
                         <li><span>Texto processado</span><strong>{{ prediction_result.input.processed_text }}</strong></li>
-                        <li><span>Sugestao inicial detalhada</span><strong>{{ prediction_result.genai.baseline_detail }}</strong></li>
+                        <li><span>Sugestão inicial detalhada</span><strong>{{ prediction_result.genai.baseline_detail }}</strong></li>
                     </ul>
                 </article>
 
@@ -174,10 +174,10 @@
                             <p class="eyebrow">Contexto</p>
                             <h2>Fonte do modelo atual</h2>
                         </div>
-                        <p>Visao expandida do contexto enviado ao refinamento.</p>
+                        <p>Visão expandida do contexto enviado ao refinamento.</p>
                     </div>
                     <ul class="distribution-list">
-                        <li><span>Classes validas da macro</span><strong>{{ prediction_result.baseline.valid_detailed_classes|length }}</strong></li>
+                        <li><span>Classes válidas da macro</span><strong>{{ prediction_result.baseline.valid_detailed_classes|length }}</strong></li>
                         <li><span>Casos similares como apoio</span><strong>{% if prediction_result.genai.similar_examples_used %}{{ prediction_result.genai.similar_examples_count }}{% else %}0{% endif %}</strong></li>
                         <li><span>Fonte do modelo</span><strong>{{ prediction_result.artifacts.dataset_source_label }}</strong></li>
                     </ul>

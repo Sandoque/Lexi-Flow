@@ -1,4 +1,4 @@
-"""Servicos para analise exploratoria do ultimo dataset ingerido."""
+"""Serviços para análise exploratória do último dataset ingerido."""
 
 from __future__ import annotations
 
@@ -14,7 +14,7 @@ from app.utils.text_statistics import calcular_estatisticas_textuais, resumir_te
 
 
 class EDAError(Exception):
-    """Representa erros esperados durante a analise exploratoria."""
+    """Representa erros esperados durante a análise exploratória."""
 
 
 def carregar_eda_do_ultimo_dataset(
@@ -26,7 +26,7 @@ def carregar_eda_do_ultimo_dataset(
     example_limit: int = 2,
     top_detailed_limit: int = 8,
 ) -> dict:
-    """Carrega o ultimo dataset disponivel e gera sua analise exploratoria."""
+    """Carrega o último dataset disponível e gera sua análise exploratória."""
     dataset_selection = localizar_dataset_mais_recente(
         upload_folder=upload_folder,
         preferred_path=preferred_path,
@@ -39,27 +39,27 @@ def carregar_eda_do_ultimo_dataset(
     try:
         dataframe = pd.read_csv(dataset_path)
     except (UnicodeDecodeError, ParserError):
-        raise EDAError("O ultimo arquivo disponivel nao pode ser interpretado como CSV valido.")
+        raise EDAError("O último arquivo disponível não pode ser interpretado como CSV válido.")
     except EmptyDataError:
-        raise EDAError("O ultimo arquivo disponivel nao possui dados para analise.")
+        raise EDAError("O último arquivo disponível não possui dados para análise.")
 
     dataframe.columns = [str(column).strip() for column in dataframe.columns]
     validar_colunas_para_eda(dataframe)
 
     text_stats = calcular_estatisticas_textuais(dataframe["texto"])
     macro_distribution = (
-        dataframe["classe_macro"].fillna("Nao informado").astype(str).value_counts().sort_values(ascending=False)
+        dataframe["classe_macro"].fillna("Não informado").astype(str).value_counts().sort_values(ascending=False)
     )
     detailed_distribution = (
         dataframe["classe_detalhada"]
-        .fillna("Nao informado")
+        .fillna("Não informado")
         .astype(str)
         .value_counts()
         .sort_values(ascending=False)
         .head(top_detailed_limit)
     )
     channel_distribution = (
-        dataframe["canal_origem"].fillna("Nao informado").astype(str).value_counts().sort_values(ascending=False)
+        dataframe["canal_origem"].fillna("Não informado").astype(str).value_counts().sort_values(ascending=False)
     )
 
     return {
@@ -90,7 +90,7 @@ def carregar_eda_do_ultimo_dataset(
         "charts": {
             "macro": gerar_grafico_barras_base64(
                 macro_distribution,
-                title="Distribuicao por classe macro",
+                title="Distribuição por classe macro",
                 color="#1f4f8f",
             ),
             "detailed": gerar_grafico_barras_base64(
@@ -101,7 +101,7 @@ def carregar_eda_do_ultimo_dataset(
             ),
             "channel": gerar_grafico_barras_base64(
                 channel_distribution,
-                title="Distribuicao por canal de origem",
+                title="Distribuição por canal de origem",
                 color="#315c47",
             ),
         },
@@ -116,7 +116,7 @@ def localizar_dataset_mais_recente(
     dataset_source: str | None = None,
     use_demo_by_default: bool = False,
 ) -> DatasetSelection:
-    """Localiza o dataset ativo conforme a fonte escolhida para a analise."""
+    """Localiza o dataset ativo conforme a fonte escolhida para a análise."""
     try:
         return localizar_dataset_disponivel(
             upload_folder=upload_folder,
@@ -127,33 +127,33 @@ def localizar_dataset_mais_recente(
         )
     except FileNotFoundError:
         raise EDAError(
-            "Nenhum dataset disponivel para analise. Faca um upload ou configure o dataset demo antes de abrir a EDA."
+            "Nenhum dataset disponível para análise. Faça um upload ou configure o dataset demo antes de abrir a EDA."
         )
 
 
 def validar_colunas_para_eda(dataframe: pd.DataFrame) -> None:
-    """Valida se o dataset possui as colunas minimas exigidas para a EDA."""
+    """Valida se o dataset possui as colunas mínimas exigidas para a EDA."""
     missing_columns = [column for column in REQUIRED_COLUMNS if column not in dataframe.columns]
 
     if missing_columns:
         missing_text = ", ".join(missing_columns)
-        raise EDAError(f"O dataset mais recente esta incompleto para EDA. Faltam: {missing_text}.")
+        raise EDAError(f"O dataset mais recente está incompleto para EDA. Faltam: {missing_text}.")
 
     if dataframe.empty:
-        raise EDAError("O dataset mais recente nao possui linhas para analise.")
+        raise EDAError("O dataset mais recente não possui linhas para análise.")
 
 
 def series_para_items(series: pd.Series) -> list[dict]:
-    """Converte uma Series de contagem para lista serializavel em template."""
+    """Converte uma Series de contagem para lista serializável em template."""
     return [{"label": str(label), "value": int(value)} for label, value in series.items()]
 
 
 def coletar_exemplos_por_macroclasse(dataframe: pd.DataFrame, limit: int = 2) -> list[dict]:
-    """Seleciona exemplos de texto por macroclasse para a visualizacao da EDA."""
+    """Seleciona exemplos de texto por macroclasse para a visualização da EDA."""
     examples = []
     normalized = dataframe.copy()
     normalized["texto"] = normalized["texto"].fillna("").astype(str)
-    normalized["classe_macro"] = normalized["classe_macro"].fillna("Nao informado").astype(str)
+    normalized["classe_macro"] = normalized["classe_macro"].fillna("Não informado").astype(str)
     normalized["id_registro"] = normalized["id_registro"].fillna("").astype(str)
 
     grouped = normalized.groupby("classe_macro", sort=True)

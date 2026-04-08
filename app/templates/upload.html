@@ -5,10 +5,10 @@
 {% block content %}
 <section class="section-heading">
     <div>
-        <p class="eyebrow">Tela dedicada de ingestao</p>
+        <p class="eyebrow">Tela dedicada de ingestão</p>
         <h1>Upload de CSV</h1>
     </div>
-    <p>A ingestao principal agora tambem aparece no Inicio, e esta tela segue como apoio para cargas dedicadas.</p>
+    <p>A ingestão principal agora também aparece no Início, e esta tela segue como apoio para cargas dedicadas.</p>
 </section>
 
 <section class="panel dataset-mode-panel">
@@ -17,14 +17,14 @@
         <h2>Fonte ativa: {{ dataset_source_label }}</h2>
         <p>
             {% if using_demo_dataset %}
-                O sistema esta apontando para o dataset demo configurado em <code>{{ demo_dataset_path }}</code>.
+                O sistema está apontando para o dataset demo configurado em <code>{{ demo_dataset_path }}</code>.
             {% else %}
-                O sistema esta apontando para o ultimo upload valido salvo em <code>data/raw/</code>.
+                O sistema está apontando para o último upload válido salvo em <code>data/raw/</code>.
             {% endif %}
         </p>
     </div>
     <div class="action-row">
-        <a class="button {% if not using_demo_dataset %}button-primary{% else %}button-secondary{% endif %}" href="{{ url_for('pipeline.upload', dataset_source='upload') }}">Usar ultimo upload</a>
+        <a class="button {% if not using_demo_dataset %}button-primary{% else %}button-secondary{% endif %}" href="{{ url_for('pipeline.upload', dataset_source='upload') }}">Usar último upload</a>
         <a class="button {% if using_demo_dataset %}button-primary{% else %}button-secondary{% endif %}" href="{{ url_for('pipeline.upload', dataset_source='demo') }}">Usar dataset demo</a>
     </div>
 </section>
@@ -32,9 +32,9 @@
 <section class="panel panel-upload">
     <div>
         <h2>Entrada inicial do pipeline</h2>
-        <p>Valida formato, checa colunas obrigatorias e salva o arquivo em <code>data/raw/</code>.</p>
+        <p>Valida formato, checa colunas obrigatórias e salva o arquivo em <code>data/raw/</code>.</p>
         <div class="expected-columns">
-            <h3>Colunas obrigatorias</h3>
+            <h3>Colunas obrigatórias</h3>
             <ul class="tag-list">
                 {% for column in expected_columns %}
                     <li>{{ column }}</li>
@@ -54,13 +54,13 @@
 {% if ingest_result %}
     <section class="section-heading">
         <div>
-            <p class="eyebrow">Resumo da ingestao</p>
+            <p class="eyebrow">Resumo da ingestão</p>
             <h2>Arquivo validado com sucesso</h2>
         </div>
         <div class="section-heading__actions">
             <p>Os dados abaixo refletem a leitura inicial do CSV salvo em <code>data/raw/</code>.</p>
             <div class="action-row">
-                <a class="button button-secondary" href="{{ url_for('pipeline.eda', dataset_source=dataset_source) }}">Abrir analise exploratoria</a>
+                <a class="button button-secondary" href="{{ url_for('pipeline.eda', dataset_source=dataset_source) }}">Abrir análise exploratória</a>
                 <a class="button button-secondary" href="{{ url_for('pipeline.baseline', dataset_source=dataset_source) }}">Treinar baseline</a>
             </div>
         </div>
@@ -70,7 +70,7 @@
         <article class="card">
             <p class="status">Arquivo</p>
             <h3>{{ ingest_result.summary.filename }}</h3>
-            <p>Nome final persistido apos a validacao.</p>
+            <p>Nome final persistido após a validação.</p>
         </article>
         <article class="card">
             <p class="status">Linhas</p>
@@ -85,7 +85,7 @@
         <article class="card">
             <p class="status">Destino</p>
             <h3>data/raw</h3>
-            <p>Camada de armazenamento bruto para a etapa de ingestao.</p>
+            <p>Camada de armazenamento bruto para a etapa de ingestão.</p>
         </article>
     </section>
 
@@ -101,10 +101,10 @@
     <section class="panel">
         <div class="table-header">
             <div>
-                <p class="eyebrow">Preview</p>
+                <p class="eyebrow">Prévia</p>
                 <h2>Primeiras 10 linhas</h2>
             </div>
-            <p>Pre-visualizacao gerada a partir do DataFrame carregado com pandas.</p>
+            <p>Pré-visualização gerada a partir do DataFrame carregado com pandas.</p>
         </div>
 
         <div class="table-wrapper">

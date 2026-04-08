@@ -6,9 +6,9 @@
 <section class="section-heading">
     <div>
         <p class="eyebrow">Etapas 03 e 04 · NLP + baseline</p>
-        <h1>Painel supervisionado em dois niveis</h1>
+        <h1>Painel supervisionado em dois níveis</h1>
     </div>
-    <p>Pipeline com pre-processamento NLP, treino supervisionado e filtro detalhado pronto para a inferencia assistida.</p>
+    <p>Pipeline com pré-processamento NLP, treino supervisionado e filtro detalhado pronto para a inferência assistida.</p>
 </section>
 
 <section class="panel dataset-mode-panel">
@@ -17,15 +17,15 @@
         <h2>{{ baseline_result.dataset.filename }}</h2>
         <p>
             {% if baseline_result.dataset.is_demo %}
-                Treino realizado com o dataset demo, ideal para uma demonstracao previsivel.
+                Treino realizado com o dataset demo, ideal para uma demonstração previsível.
             {% else %}
-                Treino realizado com o ultimo upload valido da sessao.
+                Treino realizado com o último upload válido da sessão.
             {% endif %}
         </p>
     </div>
     <div class="action-row">
         <a class="button button-secondary" href="{{ url_for('pipeline.eda', dataset_source=dataset_source) }}">Voltar para EDA</a>
-        <a class="button {% if not using_demo_dataset %}button-primary{% else %}button-secondary{% endif %}" href="{{ url_for('pipeline.baseline', dataset_source='upload') }}">Treinar com ultimo upload</a>
+        <a class="button {% if not using_demo_dataset %}button-primary{% else %}button-secondary{% endif %}" href="{{ url_for('pipeline.baseline', dataset_source='upload') }}">Treinar com último upload</a>
         <a class="button {% if using_demo_dataset %}button-primary{% else %}button-secondary{% endif %}" href="{{ url_for('pipeline.baseline', dataset_source='demo') }}">Treinar com dataset demo</a>
         <a class="button button-secondary" href="{{ url_for('pipeline.predict', dataset_source=dataset_source) }}">Abrir /predict</a>
     </div>
@@ -33,25 +33,42 @@
 
 <section class="panel hierarchy-flow">
     <article class="hierarchy-step">
-        <span class="card-layer__order">Nivel 1</span>
-        <h2>Classificacao macro</h2>
+        <span class="card-layer__order">Nível 1</span>
+        <h2>Classificação macro</h2>
         <p>Define a macroclasse com TF-IDF + Logistic Regression.</p>
     </article>
     <article class="hierarchy-step">
-        <span class="card-layer__order">Nivel 2</span>
+        <span class="card-layer__order">Nível 2</span>
         <h2>Refinamento detalhado</h2>
         <p>Restringe a classe detalhada ao conjunto coerente com a macro prevista.</p>
     </article>
     <article class="hierarchy-step">
-        <span class="card-layer__order">Operacao</span>
+        <span class="card-layer__order">Operação</span>
         <h2>Base para GenAI</h2>
-        <p>Entrega o contexto que sera reutilizado na inferencia assistida.</p>
+        <p>Entrega o contexto que será reutilizado na inferência assistida.</p>
     </article>
+</section>
+
+<section class="section-heading">
+    <div>
+        <p class="eyebrow">Decisões técnicas</p>
+        <h2>Como o baseline foi pensado</h2>
+    </div>
+    <p>Resumo curto para sustentar a defesa técnica da abordagem durante a apresentação.</p>
+</section>
+
+<section class="card-grid">
+    {% for item in baseline_result.technical_decisions %}
+        <article class="card">
+            <h3>{{ item.title }}</h3>
+            <p>{{ item.description }}</p>
+        </article>
+    {% endfor %}
 </section>
 
 {% if baseline_result.split.warnings %}
     <section class="panel">
-        <h2>Observacoes do split</h2>
+        <h2>Observações do split</h2>
         <ul class="distribution-list">
             {% for warning in baseline_result.split.warnings %}
                 <li><span>{{ warning }}</span></li>
@@ -83,8 +100,8 @@
     <article class="panel chart-panel">
         <div class="table-header">
             <div>
-                <p class="eyebrow">Nivel 1</p>
-                <h2>Matriz de confusao macro</h2>
+                <p class="eyebrow">Nível 1</p>
+                <h2>Matriz de confusão macro</h2>
             </div>
             <p>{{ baseline_result.hierarchy.macro.metrics.accuracy }} de accuracy</p>
         </div>
@@ -95,7 +112,7 @@
         </div>
         <img
             src="{{ baseline_result.hierarchy.macro.confusion_matrix_image }}"
-            alt="Matriz de confusao da macroclasse"
+            alt="Matriz de confusão da macroclasse"
             class="chart-image"
         >
     </article>
@@ -103,8 +120,8 @@
     <article class="panel chart-panel">
         <div class="table-header">
             <div>
-                <p class="eyebrow">Nivel 2</p>
-                <h2>Matriz de confusao detalhada</h2>
+                <p class="eyebrow">Nível 2</p>
+                <h2>Matriz de confusão detalhada</h2>
             </div>
             <p>{{ baseline_result.hierarchy.detailed.metrics.accuracy }} de accuracy</p>
         </div>
@@ -115,7 +132,7 @@
         </div>
         <img
             src="{{ baseline_result.hierarchy.detailed.confusion_matrix_image }}"
-            alt="Matriz de confusao da classe detalhada"
+            alt="Matriz de confusão da classe detalhada"
             class="chart-image"
         >
     </article>
@@ -124,8 +141,38 @@
 <section class="panel">
     <div class="table-header">
         <div>
+            <p class="eyebrow">Leitura dos erros</p>
+            <h2>Onde o baseline pede mais cuidado</h2>
+        </div>
+        <p>Interpretação rápida das métricas para explicar limites e o encaixe da GenAI.</p>
+    </div>
+    <ul class="distribution-list">
+        <li><span>Propagação macro -> detalhada</span><strong>{{ baseline_result.error_analysis.propagation_gap }}</strong></li>
+        <li><span>Leitura principal</span><strong>{{ baseline_result.error_analysis.propagation_message }}</strong></li>
+        <li><span>Papel da GenAI</span><strong>{{ baseline_result.error_analysis.genai_role }}</strong></li>
+    </ul>
+</section>
+
+<section class="panel">
+    <div class="table-header">
+        <div>
+        <p class="eyebrow">Classes sensíveis</p>
+            <h2>Sinais de atenção na avaliação</h2>
+        </div>
+        <p>Classes com maior chance de exigir leitura humana ou refinamento adicional.</p>
+    </div>
+    <ul class="distribution-list">
+        {% for item in baseline_result.error_analysis.risk_patterns %}
+            <li><span>{{ item }}</span></li>
+        {% endfor %}
+    </ul>
+</section>
+
+<section class="panel">
+    <div class="table-header">
+        <div>
             <p class="eyebrow">Filtro por macro</p>
-            <h2>Opcoes detalhadas por macroclasse</h2>
+            <h2>Opções detalhadas por macroclasse</h2>
         </div>
         <p>Estrutura usada para manter o refinamento detalhado sob controle.</p>
     </div>
@@ -148,24 +195,24 @@
     <div class="table-header">
         <div>
             <p class="eyebrow">Artefatos</p>
-            <h2>Persistencia do baseline</h2>
-        </div>
-        <p>Artefatos prontos para reuso em inferencia e demonstracao.</p>
+            <h2>Persistência do baseline</h2>
+    </div>
+        <p>Artefatos prontos para reuso em inferência e demonstração.</p>
     </div>
     <ul class="distribution-list">
         <li><span>Macro pipeline</span><strong>{{ baseline_result.artifacts.macro_pipeline }}</strong></li>
-        <li><span>Detailed models</span><strong>{{ baseline_result.artifacts.detailed_models }}</strong></li>
-        <li><span>Metadata</span><strong>{{ baseline_result.artifacts.metadata }}</strong></li>
+        <li><span>Modelos detalhados</span><strong>{{ baseline_result.artifacts.detailed_models }}</strong></li>
+        <li><span>Metadados</span><strong>{{ baseline_result.artifacts.metadata }}</strong></li>
     </ul>
 </section>
 
 <section class="panel">
     <div class="table-header">
         <div>
-            <p class="eyebrow">Limitacoes</p>
-            <h2>Leitura critica do baseline</h2>
-        </div>
-        <p>Pontos importantes para contextualizar a demonstracao.</p>
+        <p class="eyebrow">Limitações</p>
+        <h2>Leitura crítica do baseline</h2>
+    </div>
+        <p>Pontos importantes para contextualizar a demonstração.</p>
     </div>
     <ul class="distribution-list">
         {% for limitation in baseline_result.limitations %}
@@ -175,16 +222,16 @@
 </section>
 
 <details class="panel details-panel">
-    <summary>Detalhes tecnicos opcionais</summary>
+    <summary>Detalhes técnicos opcionais</summary>
     <div class="details-panel__content">
         <section class="charts-grid">
             <article class="panel chart-panel panel-subtle">
                 <div class="table-header">
                     <div>
                         <p class="eyebrow">Detalhada</p>
-                        <h2>Classification report</h2>
+                        <h2>Relatório por classe</h2>
                     </div>
-                    <p>Metricas por classe do nivel 2.</p>
+                    <p>Métricas por classe do nível 2.</p>
                 </div>
                 <div class="table-wrapper">
                     <table class="data-table">
@@ -216,13 +263,13 @@
                 <div class="table-header">
                     <div>
                         <p class="eyebrow">Exemplos</p>
-                        <h2>Predicoes corretas e incorretas</h2>
+                        <h2>Predições corretas e incorretas</h2>
                     </div>
                     <p>Leitura qualitativa complementar.</p>
                 </div>
                 <div class="examples-grid examples-grid--wide">
                     <article class="example-group">
-                        <h3>Predicoes corretas</h3>
+                        <h3>Predições corretas</h3>
                         {% if baseline_result.hierarchy.detailed.examples.correct %}
                             {% for example in baseline_result.hierarchy.detailed.examples.correct %}
                                 <div class="example-item">
@@ -232,12 +279,12 @@
                                 </div>
                             {% endfor %}
                         {% else %}
-                            <p>Nao houve exemplos corretos no conjunto exibido.</p>
+                            <p>Não houve exemplos corretos no conjunto exibido.</p>
                         {% endif %}
                     </article>
 
                     <article class="example-group">
-                        <h3>Predicoes incorretas</h3>
+                        <h3>Predições incorretas</h3>
                         {% if baseline_result.hierarchy.detailed.examples.incorrect %}
                             {% for example in baseline_result.hierarchy.detailed.examples.incorrect %}
                                 <div class="example-item">
@@ -247,7 +294,7 @@
                                 </div>
                             {% endfor %}
                         {% else %}
-                            <p>Nao houve exemplos incorretos no conjunto exibido.</p>
+                            <p>Não houve exemplos incorretos no conjunto exibido.</p>
                         {% endif %}
                     </article>
                 </div>

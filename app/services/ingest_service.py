@@ -1,4 +1,4 @@
-"""Servicos para ingestao e validacao inicial de datasets CSV."""
+"""Serviços para ingestão e validação inicial de datasets CSV."""
 
 from __future__ import annotations
 
@@ -23,7 +23,7 @@ REQUIRED_COLUMNS = [
 
 
 class IngestaoError(Exception):
-    """Representa erros esperados durante a ingestao do dataset."""
+    """Representa erros esperados durante a ingestão do dataset."""
 
 
 def processar_upload_csv(
@@ -31,7 +31,7 @@ def processar_upload_csv(
     upload_folder: str | Path,
     allowed_extensions: set[str] | None = None,
 ) -> dict:
-    """Executa o fluxo completo de ingestao de um arquivo CSV."""
+    """Executa o fluxo completo de ingestão de um arquivo CSV."""
     allowed_extensions = allowed_extensions or {"csv"}
     filename = validar_arquivo_enviado(uploaded_file, allowed_extensions)
     if uploaded_file is None:
@@ -51,7 +51,7 @@ def validar_arquivo_enviado(
     uploaded_file: FileStorage | None,
     allowed_extensions: set[str],
 ) -> str:
-    """Valida a presenca do arquivo e sua extensao."""
+    """Valida a presença do arquivo e sua extensão."""
     if uploaded_file is None or uploaded_file.filename is None or uploaded_file.filename == "":
         raise IngestaoError("Selecione um arquivo CSV para continuar.")
 
@@ -62,18 +62,18 @@ def validar_arquivo_enviado(
 
     extension = filename.rsplit(".", 1)[1].lower()
     if extension not in allowed_extensions:
-        raise IngestaoError("A extensao do arquivo nao e permitida para ingestao.")
+        raise IngestaoError("A extensão do arquivo não é permitida para ingestão.")
 
     return filename
 
 
 def obter_conteudo_arquivo(uploaded_file: FileStorage) -> bytes:
-    """Le o conteudo do arquivo enviado para processamento seguro."""
+    """Lê o conteúdo do arquivo enviado para processamento seguro."""
     uploaded_file.stream.seek(0)
     file_bytes = uploaded_file.read()
 
     if not file_bytes:
-        raise IngestaoError("O arquivo enviado esta vazio.")
+        raise IngestaoError("O arquivo enviado está vazio.")
 
     return file_bytes
 
@@ -83,14 +83,14 @@ def carregar_dataframe(file_bytes: bytes) -> pd.DataFrame:
     try:
         dataframe = pd.read_csv(BytesIO(file_bytes))
     except (UnicodeDecodeError, ParserError):
-        raise IngestaoError("Nao foi possivel ler o arquivo como CSV valido.")
+        raise IngestaoError("Não foi possível ler o arquivo como CSV válido.")
     except EmptyDataError:
-        raise IngestaoError("O arquivo CSV nao possui registros para processar.")
+        raise IngestaoError("O arquivo CSV não possui registros para processar.")
 
     dataframe.columns = [str(column).strip() for column in dataframe.columns]
 
     if dataframe.empty:
-        raise IngestaoError("O arquivo CSV foi lido, mas nao possui linhas de dados.")
+        raise IngestaoError("O arquivo CSV foi lido, mas não possui linhas de dados.")
 
     return dataframe
 
@@ -102,7 +102,7 @@ def validar_colunas_obrigatorias(dataframe: pd.DataFrame) -> None:
     if missing_columns:
         missing_text = ", ".join(missing_columns)
         raise IngestaoError(
-            f"O dataset nao possui todas as colunas obrigatorias. Faltam: {missing_text}."
+            f"O dataset não possui todas as colunas obrigatórias. Faltam: {missing_text}."
         )
 
 
@@ -115,7 +115,7 @@ def salvar_arquivo(file_bytes: bytes, upload_folder: str | Path, filename: str) 
 
 
 def gerar_caminho_disponivel(upload_folder: Path, filename: str) -> Path:
-    """Gera um nome de arquivo livre caso o nome original ja exista."""
+    """Gera um nome de arquivo livre caso o nome original já exista."""
     destination = upload_folder / filename
 
     if not destination.exists():
@@ -133,7 +133,7 @@ def gerar_caminho_disponivel(upload_folder: Path, filename: str) -> Path:
 
 
 def gerar_resumo_dataset(filename: str, dataframe: pd.DataFrame) -> dict:
-    """Monta o resumo exibido na interface apos a ingestao."""
+    """Monta o resumo exibido na interface após a ingestão."""
     preview_df = dataframe.head(10).fillna("")
     preview_rows = preview_df.astype(str).to_dict(orient="records")
 
