@@ -308,14 +308,6 @@ secret.env           Variáveis locais do ambiente
 
 ## Decisões Técnicas
 
-### Defesa técnica resumida
-
-Se a solução precisar ser defendida de forma curta em entrevista, a lógica central é:
-
-- baseline supervisionado primeiro para garantir referência forte, explicável e reproduzível
-- hierarquia macro -> detalhada para refletir a taxonomia real do problema
-- GenAI depois do baseline para refinar, justificar e apoiar a operação sem substituir a classificação principal
-
 ### Flask com app factory e blueprints
 
 Permite organização por camadas, evolução modular e estrutura mais profissional do que um app monolítico simples.
@@ -374,16 +366,5 @@ O repositório inclui um apêndice leve em `notebooks/` para apoiar a conversa t
 - justificativa do baseline
 - interpretação dos resultados
 
-## Por Que Esta Solução É Aderente à Vaga de Dados & IA Generativa
-
-Este projeto demonstra, de forma prática, competências diretamente aderentes a uma vaga de Dados e IA Generativa:
-
-- entendimento de problema de negócio com tradução para solução analítica
-- EDA aplicada a dados textuais
-- NLP com pré-processamento reutilizável
-- classificação supervisionada com baseline defendível
-- avaliação de métricas e leitura crítica dos erros
-- integração pragmática de IA generativa em fluxo real
-- preocupação com operação assistida, explicabilidade e evolução
 
 Em outras palavras, o LexiFlow não é apenas um experimento técnico. Ele mostra capacidade de estruturar uma solução fim a fim, equilibrando engenharia, modelagem, IA generativa e aplicação de negócio.
